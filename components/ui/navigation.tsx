@@ -67,7 +67,7 @@ export function Navigation() {
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
-            <button className="text-primary hover:bg-offwhite/10 p-6 min-w-0 flex items-center justify-center rounded-md transition-colors">
+            <button className="text-primary hover:bg-offwhite/10 py-2 md:py-6 px-6 min-w-0 flex items-center justify-center rounded-md transition-colors">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Ouvrir le menu</span>
             </button>
@@ -149,7 +149,7 @@ export function Navigation() {
       </div>
       
       {/* Élément invisible pour équilibrer le layout mobile */}
-      <div className="md:hidden p-[36px]"></div>
+      <div className="md:hidden px-[36px]"></div>
     </header>
   )
 } 
