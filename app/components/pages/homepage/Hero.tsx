@@ -44,7 +44,7 @@ export default function Hero() {
           </div>
           <Tagline>Le choix des pionniers</Tagline>
         </div>
-        <h1 className="gradient-title text-4xl md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black">Origine<br />de votre évolution</h1>
+        <h1 className="gradient-title text-5xl md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black">Origine<br />de votre évolution</h1>
         <p className="max-w-xs md:max-w-xl mx-auto drop-shadow text-offwhite font-extralight px-2">Kaitos est l'agence IA Française qui accompagne les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.</p>
         <div className="flex gap-4 justify-center mt-6">
           <Button variant="default" size="lg" className="bg-offwhite text-secondary hover:bg-primary hover:text-offwhite flex items-center gap-1">
