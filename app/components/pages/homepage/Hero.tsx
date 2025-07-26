@@ -16,7 +16,7 @@ export default function Hero() {
         src="/images/HerobannerFull.jpg"
         alt="Bannière principale Kaitos"
         fill
-        className="object-cover object-[center_200%] w-full h-full"
+        className="object-cover object-[center_95%] w-full h-full"
         priority
         quality={100}
       />
