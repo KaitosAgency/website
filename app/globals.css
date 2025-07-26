@@ -42,25 +42,154 @@ a {
 
 @font-face {
   font-family: 'Aileron';
-  src: url('/fonts/Aileron-Regular.woff2') format('woff2');
+  src: url('/fonts/Aileron/Aileron-Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-UltraLight.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Aileron';
-  src: url('/fonts/Aileron-Bold.woff2') format('woff2');
+  src: url('/fonts/Aileron/Aileron-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Heavy.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Italic variants */
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-ThinItalic.otf') format('opentype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-UltraLightItalic.otf') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-LightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-SemiBoldItalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-HeavyItalic.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aileron';
+  src: url('/fonts/Aileron/Aileron-BlackItalic.otf') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Aileron', sans-serif;
+  font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1 {
   line-height: 0.85em !important;
+}
+
+h2 {
+  font-weight: 800;
+}
+
+h3 {
+  font-weight: 700;
+}
+
+h4, h5, h6 {
+  font-weight: 600;
 }
 
 .gradient-title {
@@ -76,6 +205,32 @@ h1 {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force Aileron pour tous les titres sur mobile */
+@media (max-width: 768px) {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  
+  .gradient-title {
+    font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+}
+
+/* Optimisation pour le chargement de la police */
+.font-aileron {
+  font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-display: swap;
+}
+
+/* Fallback pour éviter le FOUT (Flash of Unstyled Text) */
+@supports (font-display: swap) {
+  h1, h2, h3, h4, h5, h6 {
+    font-display: swap;
+  }
 }
 
 @layer base {

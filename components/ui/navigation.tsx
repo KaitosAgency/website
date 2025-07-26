@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { Menu, X } from "lucide-react"
 import { ArrowIcon } from "@/components/ui/arrow-icon"
 
@@ -67,21 +67,39 @@ export function Navigation() {
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+            <Button variant="ghost" size="sm" className="text-primary hover:bg-offwhite/10">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Ouvrir le menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] bg-black/95 border-l border-white/20">
+          <SheetContent side="left" className="w-[300px] bg-secondary/70 backdrop-blur-md border-r border-offwhite/10">
+            <SheetTitle className="sr-only">Menu de navigation Kaitos</SheetTitle>
             <div className="flex flex-col h-full">
               {/* Logo dans le menu mobile */}
-              <div className="flex justify-center py-6 border-b border-white/20">
+              <div className="flex justify-center items-center py-6 border-b border-white/10">
                 <Image 
                   src="/images/Logo/logo_kaitos_full_light.svg" 
                   alt="Kaitos" 
                   width={100} 
                   height={26}
                 />
+              </div>
+              
+              {/* Sélection de langue mobile */}
+              <div className="flex justify-center items-center gap-4 py-4 border-b border-offwhite/10">
+                <div className="flex gap-4 text-xs text-offwhite/80 tracking-widest">
+                  <button className="text-white font-medium" aria-label="Version française">
+                    FR
+                  </button>
+                  <span className="text-white/40">|</span>
+                  <button className="hover:text-white transition-colors" aria-label="English version">
+                    EN
+                  </button>
+                  <span className="text-white/40">|</span>
+                  <button className="hover:text-white transition-colors" aria-label="日本語版">
+                    JP
+                  </button>
+                </div>
               </div>
               
               {/* Navigation mobile */}
@@ -91,8 +109,8 @@ export function Navigation() {
                     <li key={item.name}>
                       <Link
                         href={item.href}
-                        className="block text-white/90 hover:text-white text-lg font-medium transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-white/90 hover:text-white text-lg font-light transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)} 
                         title={item.description}
                       >
                         {item.name}
@@ -103,10 +121,10 @@ export function Navigation() {
               </nav>
               
               {/* Bouton CTA mobile */}
-              <div className="border-t border-white/20 pt-6">
+              <div className="border-t border-white/10 pt-6">
                 <Button 
                   variant="default" 
-                  className="w-full bg-orange-400 text-white hover:bg-orange-500"
+                  className="w-full bg-primary text-offwhite hover:bg-offwhite hover:text-secondary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Réserver un appel
@@ -129,6 +147,9 @@ export function Navigation() {
           />
         </Link>
       </div>
+      
+      {/* Élément invisible pour équilibrer le layout mobile */}
+      <div className="md:hidden w-10"></div>
     </header>
   )
 } 

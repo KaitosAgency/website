@@ -6,7 +6,7 @@ import { Navigation } from "@/components/ui/navigation";
 
 export default function Hero() {
   return (
-    <section className="relative w-full h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-secondary px-4">
       {/* Bannière Site en construction */}
       <div className="absolute top-0 left-0 right-0 h-5 bg-primary z-20 flex items-center justify-center">
         <span className="text-white text-xs font-normal">Site en construction</span>
@@ -16,14 +16,14 @@ export default function Hero() {
         src="/images/HerobannerFull.jpg"
         alt="Bannière principale Kaitos"
         fill
-        className="object-cover w-full h-full"
+        className="object-cover object-[center_200%] w-full h-full"
         priority
         quality={100}
       />
       {/* Overlay dégradé secondary */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary from-5% via-transparent via-25% to-transparent to-100% z-5"></div>
+      <div className="absolute inset-0 h-[70%] bg-gradient-to-b from-secondary from-5% via-transparent via-25% to-transparent to-100% z-5"></div>
       {/* Overlay dégradé secondary en bas */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-secondary to-transparent z-5"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-secondary via-secondary via-30% to-transparent to-100% z-5"></div>
       <Navigation />
       {/* Overlay contenu Hero */}
       <div className="relative z-10 flex flex-col items-center justify-end w-full h-full text-white text-center gap-4 pb-16">
@@ -38,8 +38,8 @@ export default function Hero() {
           </div>
           <Tagline>Le choix des pionniers</Tagline>
         </div>
-        <h1 className="gradient-title text-6xl md:text-7xl font-medium drop-shadow-lg shadow-black">Origine<br />de votre évolution</h1>
-        <p className="text-sm max-w-xl mx-auto drop-shadow text-offwhite font-extralight">Kaitos est l'agence IA Française qui accompagne les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.</p>
+        <h1 className="gradient-title text-4xl md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black">Origine<br />de votre évolution</h1>
+        <p className="text-sm max-w-xs md:max-w-xl mx-auto drop-shadow text-offwhite font-extralight px-2">Kaitos est l'agence IA Française qui accompagne les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.</p>
         <div className="flex gap-4 justify-center mt-6">
           <Button variant="default" size="lg" className="bg-offwhite text-secondary hover:bg-primary hover:text-offwhite flex items-center gap-1">
             Commencer aujourd'hui

@@ -31,6 +31,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/Aileron/Aileron-Regular.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Aileron/Aileron-Bold.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Aileron/Aileron-Black.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
         {/* Header retiré ici, il sera déplacé dans Hero */}
         {children}
