@@ -18,9 +18,14 @@ p {
   font-family: 'Outfit', var(--font-outfit), sans-serif;
 }
 
-li, span, a, div, input, textarea, button, label, strong, em, b, u, small, code, pre, blockquote, th, td, tr, table, ul, ol, dl, dt, dd {
+li, span, a, div, input, textarea, button, label, strong, em, u, small, code, pre, blockquote, th, td, tr, table, ul, ol, dl, dt, dd {
   font-family: 'Outfit', var(--font-outfit), sans-serif;
   font-weight: 300;
+}
+
+b, strong {
+  font-family: 'Outfit', var(--font-outfit), sans-serif;
+  font-weight: 600;
 }
 
 * {

@@ -68,6 +68,7 @@ module.exports = {
         primary: 'hsl(var(--primary))',
         'primary-light': '#fa7a5a', // version plus claire de #F05C39
         secondary: 'hsl(var(--secondary))',
+        'secondarydark': 'hsl(230, 14%, 10%)', // RGB(21, 22, 28)
         offwhite: 'hsl(var(--offwhite))',
         gold: '#FFBD00', // R255 V189 B0
   		}

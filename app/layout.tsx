@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { Footer } from "@/app/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
         {/* Header retiré ici, il sera déplacé dans Hero */}
         {children}
+        <Footer />
       </body>
     </html>
   );

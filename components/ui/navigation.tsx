@@ -20,7 +20,7 @@ export function Navigation() {
   return (
     <header className="absolute top-0 left-0 w-full flex items-center justify-between px-6 md:px-12 pt-8 z-20">
       {/* Langues à gauche */}
-      <div className="hidden md:flex gap-4 text-xs text-white/80 tracking-widest">
+      <div className="hidden md:flex gap-4 text-xs text-white/80 tracking-widest mt-3">
         <Link href="#" className="hover:text-white transition-colors" aria-label="Version française">
           FR
         </Link>
@@ -67,10 +67,10 @@ export function Navigation() {
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-primary hover:bg-offwhite/10">
-              <Menu className="h-5 w-5" />
+            <button className="text-primary hover:bg-offwhite/10 p-6 min-w-0 flex items-center justify-center rounded-md transition-colors">
+              <Menu className="h-6 w-6" />
               <span className="sr-only">Ouvrir le menu</span>
-            </Button>
+            </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] bg-secondary/70 backdrop-blur-md border-r border-offwhite/10">
             <SheetTitle className="sr-only">Menu de navigation Kaitos</SheetTitle>
@@ -149,7 +149,7 @@ export function Navigation() {
       </div>
       
       {/* Élément invisible pour équilibrer le layout mobile */}
-      <div className="md:hidden w-10"></div>
+      <div className="md:hidden p-[36px]"></div>
     </header>
   )
 } 
