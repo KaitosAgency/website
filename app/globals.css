@@ -305,3 +305,12 @@ h4, h5, h6 {
     @apply bg-background text-foreground;
   }
 }
+
+/* Styles pour les liens dans LayoutPage */
+.layout-page-prose a {
+  font-weight:400
+}
+
+.layout-page-prose a:hover {
+  opacity:0.8
+}

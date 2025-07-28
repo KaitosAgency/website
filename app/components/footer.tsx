@@ -23,16 +23,16 @@ export function Footer() {
               Nous transformons vos processus métier avec des solutions IA innovantes et sur mesure.
             </p>
             <div className="flex space-x-4 justify-center md:justify-start">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="#" className="transition-colors">
                 <span className="sr-only">YouTube</span>
                 <FaYoutube className="h-6 w-6" />
-              </a>
+              </Link>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="text-sm font-semibold mb-2">Services</h3>
+            <h3 className="text-md font-semibold mb-2">Services</h3>
             <ul className="space-y-1 text-offwhite/80">
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
@@ -64,13 +64,13 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-sm font-semibold mb-2 text-offwhite">Contact</h3>
+            <h3 className="text-md font-semibold mb-2 text-offwhite">Contact</h3>
             <ul className="space-y-1 text-offwhite/80">
               <li>
                 <span className="block text-sm font-medium">Email</span>
-                <a href="mailto:contact@kaitos.fr" className="hover:text-white transition-colors">
+                <Link href="mailto:contact@kaitos.fr" className="transition-colors">
                   contact@kaitos.fr
-                </a>
+                </Link>
               </li>
               <li>
                 <span className="block text-sm font-medium">Adresse</span>
@@ -87,13 +87,13 @@ export function Footer() {
               <b>© {new Date().getFullYear()} Kaitos.</b> Tous droits réservés.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-offwhite text-sm transition-colors">
+              <Link href="/politique-confidentialite" className="text-sm transition-colors">
                 Politique de confidentialité
               </Link>
-              <Link href="#" className="hover:text-offwhite text-sm transition-colors">
+              <Link href="/conditions-utilisation" className="text-sm transition-colors">
                 Conditions d'utilisation
               </Link>
-              <Link href="#" className="hover:text-offwhite text-sm transition-colors">
+              <Link href="/mentions-legales" className="text-sm transition-colors">
                 Mentions légales
               </Link>
             </div>
