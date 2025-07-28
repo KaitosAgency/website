@@ -24,14 +24,6 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Kaitos Agency  - L'Agence IA numéro 1 en France",
   description: "Kaitos - L'Agence IA numéro 1 en France. Nous aidons les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.",
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' }
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({

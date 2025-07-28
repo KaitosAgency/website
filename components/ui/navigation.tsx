@@ -37,7 +37,7 @@ export function Navigation() {
       <nav
         className={`hidden rounded-md px-12 py-2 md:flex fixed left-1/2 top-8 transform -translate-x-1/2 items-center justify-between z-30 transition-all duration-100 min-w-[1152px] ${
           isHome
-            ? `min-w-4 gap-12 bg-secondary ${isScrolled ? '' : 'border-none'}`
+            ? `!min-w-4 gap-12 bg-secondary ${isScrolled ? '' : 'border-none'}`
             : `bg-white ${isScrolled ? 'border border-secondary/10' : 'border border-white'}`
         }`}
         role="navigation"
