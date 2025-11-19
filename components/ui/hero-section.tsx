@@ -85,7 +85,7 @@ export function HeroSection({
             {tagline && <Tagline>{tagline}</Tagline>}
           </div>
         )}
-        <h1 className="gradient-title text-[42px] md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black">
+        <h1 className="gradient-title text-[42px] md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black whitespace-pre-line overflow-visible py-2">
           {title}
         </h1>
         <p className="max-w-xs md:max-w-2xl mx-auto drop-shadow-lg text-offwhite font-extralight px-2 text-base md:text-lg">

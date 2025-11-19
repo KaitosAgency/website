@@ -1,106 +1,143 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
 import { ArrowIcon } from "@/components/ui/arrow-icon";
 import { HeroSection } from "@/components/ui/hero-section";
 import { ContentCard } from "@/components/ui/content-card";
 import { Section, SectionHeader } from "@/components/ui/section";
+import { useI18n } from "@/lib/i18n";
 
 export default function MusicPage() {
+  const { t } = useI18n();
+  
   return (
     <main className="flex min-h-screen flex-col">
       {/* Section Hero */}
       <HeroSection
         imageSrc="/images/Music.jpg"
-        imageAlt="Bannière catalogue beatmakers Kaitos"
-        tagline="Catalogue de beatmakers professionnels"
-        title={
-          <>
-            Le son qui vous<br />correspond à 100%
-          </>
-        }
-        description="Découvrez notre catalogue de beatmakers professionnels et trouvez le producteur qui créera le son parfait pour votre projet. Techniques IA et artisanales combinées pour un résultat unique."
-        ctaText="Rejoindre le catalogue"
+        imageAlt="SoundCloud Label Manager - Outil de gestion pour labels musicaux"
+        tagline={t("music.tagline")}
+        title={t("music.title")}
+        description={t("music.description")}
+        ctaText={t("music.cta")}
         overlayIntensity="strong"
       />
 
-      {/* Section Catalogue */}
+      {/* Section Présentation */}
       <Section variant="default">
         <SectionHeader
-          title={
-            <>
-              Un catalogue de <span className="text-primary">beatmakers d'exception</span>
-            </>
-          }
-          description="Nous mettons en relation les meilleurs producteurs avec les artistes qui cherchent le son parfait pour leur projet musical."
+          title={t("music.sectionTitle")}
+          description={t("music.sectionDescription")}
         />
 
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           <ContentCard
-            title="Pour les artistes"
-            description="Accédez à un catalogue sélectionné de beatmakers professionnels. Trouvez le producteur qui comprend votre vision et créera le son qui vous correspond à 100%."
+            title={t("music.forLabels.title")}
+            description={t("music.forLabels.description")}
             items={[
-              "Catalogue de producteurs vérifiés",
-              "Recherche par style et ambiance",
-              "Écoute de démos avant engagement",
+              t("music.forLabels.items.0"),
+              t("music.forLabels.items.1"),
+              t("music.forLabels.items.2"),
+              t("music.forLabels.items.3"),
             ]}
           />
 
           <ContentCard
-            title="Pour les producteurs"
-            description="Rejoignez notre catalogue et faites découvrir votre talent à des artistes en quête de collaboration. Augmentez votre visibilité et développez votre réseau professionnel."
+            title={t("music.forArtists.title")}
+            description={t("music.forArtists.description")}
             items={[
-              "Visibilité accrue auprès des artistes",
-              "Mise en avant de votre portfolio",
-              "Opportunités de collaboration",
+              t("music.forArtists.items.0"),
+              t("music.forArtists.items.1"),
+              t("music.forArtists.items.2"),
+              t("music.forArtists.items.3"),
             ]}
           />
         </div>
       </Section>
 
-      {/* Section Techniques */}
+      {/* Section Fonctionnalités */}
       <Section variant="gradient" containerClassName="text-center">
         <SectionHeader
-          title={
-            <>
-              Techniques <span className="text-primary">IA et artisanales</span>
-            </>
-          }
-          description="Nous combinons l'intelligence artificielle la plus avancée avec l'expertise artisanale de nos beatmakers pour créer le son qui vous correspond à 100%. Chaque production est unique, sur-mesure et pensée pour votre projet."
+          title={t("music.features.title")}
+          description={t("music.features.description")}
           className="mb-12"
         />
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <ContentCard
             variant="minimal"
-            title="Techniques IA"
-            description="Utilisation de l'intelligence artificielle pour analyser vos références, générer des idées créatives et optimiser la production musicale."
-            icon="🤖"
+            title={t("music.features.automation.title")}
+            description={t("music.features.automation.description")}
+            icon="⚙️"
           />
 
           <ContentCard
             variant="minimal"
-            title="Expertise artisanale"
-            description="Le savoir-faire et la créativité humaine de nos beatmakers pour donner vie à votre vision avec sensibilité et précision."
-            icon="🎵"
+            title={t("music.features.analytics.title")}
+            description={t("music.features.analytics.description")}
+            icon="📊"
           />
+
+          <ContentCard
+            variant="minimal"
+            title={t("music.features.workflow.title")}
+            description={t("music.features.workflow.description")}
+            icon="📅"
+          />
+
+          <ContentCard
+            variant="minimal"
+            title={t("music.features.multiAccount.title")}
+            description={t("music.features.multiAccount.description")}
+            icon="🔗"
+          />
+        </div>
+      </Section>
+
+      {/* Section À propos */}
+      <Section variant="default">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-secondary/60 backdrop-blur-sm border border-offwhite/10 rounded-lg p-8 md:p-12">
+        <h2 className="text-3xl md:text-4xl text-offwhite mb-6 text-center break-words">
+          {t("music.about.title")}
+        </h2>
+            <div className="space-y-4 text-offwhite/80 font-light leading-relaxed">
+              <p>{t("music.about.paragraph1")}</p>
+              <p>{t("music.about.paragraph2")}</p>
+              <p className="pt-4 border-t border-offwhite/10">
+                <strong className="text-offwhite font-semibold">{t("music.about.paragraph3").split(":")[0]}:</strong> {t("music.about.paragraph3").split(":")[1]}
+              </p>
+            </div>
+          </div>
         </div>
       </Section>
 
       {/* Section CTA */}
       <Section variant="dark" containerClassName="text-center max-w-4xl">
-        <h2 className="text-4xl md:text-5xl font-bold text-offwhite mb-6">
-          Prêt à rejoindre notre catalogue ?
+        <h2 className="text-4xl md:text-5xl text-offwhite mb-6 break-words">
+          {t("music.ctaSection.title")}
         </h2>
         <p className="text-offwhite/80 max-w-2xl mx-auto font-light mb-8 text-lg">
-          Inscrivez-vous dès maintenant pour apparaître sur notre catalogue de producteurs et connectez-vous avec des artistes en quête de votre talent.
+          {t("music.ctaSection.description")}
         </p>
-        <Button 
-          variant="default" 
-          size="lg" 
-          className="bg-primary text-offwhite hover:bg-primary/90 flex items-center gap-1 mx-auto shadow-lg"
-        >
-          S'inscrire maintenant
-          <ArrowIcon size={18} />
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button 
+            variant="default" 
+            size="lg" 
+            className="bg-primary text-offwhite hover:bg-primary/90 flex items-center gap-1 shadow-lg"
+          >
+            {t("music.cta")}
+            <ArrowIcon size={18} />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="border-offwhite/40 text-offwhite hover:bg-offwhite/20 hover:border-offwhite/60 flex items-center gap-1 bg-offwhite/5"
+          >
+            {t("music.learnMore")}
+            <ArrowIcon size={18} />
+          </Button>
+        </div>
       </Section>
     </main>
   );

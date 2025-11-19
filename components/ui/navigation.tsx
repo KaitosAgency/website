@@ -8,12 +8,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Menu, X } from "lucide-react"
 import { ArrowIcon } from "@/components/ui/arrow-icon"
 import { usePathname } from "next/navigation"
-
-const navigationItems = [
-  { name: "Solutions", href: "#solutions", description: "Découvrez nos solutions IA" },
-  { name: "Secteurs", href: "#secteurs", description: "Secteurs d'activité" },
-  { name: "Tech", href: "#tech", description: "Technologies et expertise" },
-]
+import { useI18n } from "@/lib/i18n"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -21,6 +16,13 @@ export function Navigation() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isDarkPage = pathname === "/" || pathname === "/music";
+  const { language, setLanguage, t } = useI18n();
+
+  const navigationItems = [
+    { name: t("navigation.solutions"), href: "#solutions", description: "Découvrez nos solutions IA" },
+    { name: t("navigation.sectors"), href: "#secteurs", description: "Secteurs d'activité" },
+    { name: t("navigation.tech"), href: "#tech", description: "Technologies et expertise" },
+  ]
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +33,10 @@ export function Navigation() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const handleLanguageChange = (lang: "fr" | "en" | "jp") => {
+    setLanguage(lang)
+  }
 
   return (
     <>
@@ -69,7 +75,7 @@ export function Navigation() {
           variant="link"
           className={`${isDarkPage ? 'text-primary hover:text-offwhite' : 'text-secondary hover:text-primary'} font-medium flex items-center gap-1 p-0 text-md`}
         >
-          Réserver un appel
+          {t("common.reserveCall")}
           <ArrowIcon size={14} />
         </Button>
       </nav>
@@ -110,15 +116,39 @@ export function Navigation() {
                   <div className={`flex gap-4 text-xs tracking-widest ${
                     isDarkPage ? 'text-offwhite/80' : 'text-secondary/80'
                   }`}>
-                    <button className={`font-medium ${isDarkPage ? 'text-white' : 'text-secondary'}`} aria-label="Version française">
+                    <button 
+                      onClick={() => handleLanguageChange("fr")}
+                      className={`font-medium transition-colors ${
+                        language === "fr" 
+                          ? isDarkPage ? 'text-white' : 'text-secondary'
+                          : isDarkPage ? 'text-white/60 hover:text-white' : 'text-secondary/60 hover:text-secondary'
+                      }`} 
+                      aria-label="Version française"
+                    >
                       FR
                     </button>
                     <span className={isDarkPage ? 'text-white/40' : 'text-secondary/40'}>|</span>
-                    <button className={`hover:transition-colors ${isDarkPage ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="English version">
+                    <button 
+                      onClick={() => handleLanguageChange("en")}
+                      className={`font-medium transition-colors ${
+                        language === "en" 
+                          ? isDarkPage ? 'text-white' : 'text-secondary'
+                          : isDarkPage ? 'text-white/60 hover:text-white' : 'text-secondary/60 hover:text-secondary'
+                      }`} 
+                      aria-label="English version"
+                    >
                       EN
                     </button>
                     <span className={isDarkPage ? 'text-white/40' : 'text-secondary/40'}>|</span>
-                    <button className={`hover:transition-colors ${isDarkPage ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="日本語版">
+                    <button 
+                      onClick={() => handleLanguageChange("jp")}
+                      className={`font-medium transition-colors ${
+                        language === "jp" 
+                          ? isDarkPage ? 'text-white' : 'text-secondary'
+                          : isDarkPage ? 'text-white/60 hover:text-white' : 'text-secondary/60 hover:text-secondary'
+                      }`} 
+                      aria-label="日本語版"
+                    >
                       JP
                     </button>
                   </div>
@@ -153,7 +183,7 @@ export function Navigation() {
                     className="w-full bg-primary text-offwhite hover:bg-offwhite hover:text-secondary"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Réserver un appel
+                    {t("common.reserveCall")}
                   </Button>
                 </div>
               </div>
@@ -179,4 +209,4 @@ export function Navigation() {
       </header>
     </>
   )
-} 
+}

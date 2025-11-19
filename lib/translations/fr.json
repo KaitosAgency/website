@@ -1,0 +1,77 @@
+{
+  "common": {
+    "siteUnderConstruction": "Site en construction",
+    "reserveCall": "Réserver un appel"
+  },
+  "home": {
+    "tagline": "Le choix des pionniers",
+    "title": "Origine\nde votre évolution",
+    "description": "Kaitos est l'agence IA Française qui accompagne les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.",
+    "cta": "Commencer aujourd'hui"
+  },
+  "music": {
+    "tagline": "Outil de gestion SoundCloud",
+    "title": "Gérez vos comptes\nSoundCloud en un clic",
+    "description": "Un dashboard privé permettant aux labels et artistes de connecter leurs comptes SoundCloud, visualiser les analytics, planifier les publications et gérer plusieurs profils depuis une interface centralisée.",
+    "cta": "Demander l'accès",
+    "learnMore": "En savoir plus",
+    "sectionTitle": "SoundCloud Label Manager : votre outil de gestion",
+    "sectionDescription": "Un outil interne développé par Kaitos pour aider les labels musicaux et les artistes à gérer efficacement leurs multiples comptes SoundCloud avec automatisation, analytics et workflows optimisés.",
+    "forLabels": {
+      "title": "Pour les labels musicaux",
+      "description": "Simplifiez la gestion de vos multiples comptes SoundCloud depuis une interface unique. Centralisez vos opérations, automatisez vos workflows et optimisez votre présence sur la plateforme.",
+      "items": [
+        "Gestion centralisée de plusieurs comptes",
+        "Workflow de publication automatisé",
+        "Analytics détaillés et rapports consolidés",
+        "Planification des uploads"
+      ]
+    },
+    "forArtists": {
+      "title": "Pour les artistes",
+      "description": "Gérez efficacement votre présence SoundCloud avec des outils professionnels. Suivez vos performances, planifiez vos sorties et optimisez votre stratégie de contenu.",
+      "items": [
+        "Connexion sécurisée de votre compte",
+        "Visualisation des analytics en temps réel",
+        "Planification des publications",
+        "Gestion multi-profils simplifiée"
+      ]
+    },
+    "features": {
+      "title": "Fonctionnalités clés",
+      "description": "Notre outil offre toutes les fonctionnalités nécessaires pour une gestion professionnelle de vos comptes SoundCloud, avec automatisation et insights avancés.",
+      "automation": {
+        "title": "Automatisation",
+        "description": "Automatisez vos workflows de publication et de gestion de contenu. Planifiez vos uploads, gérez vos métadonnées et optimisez vos processus répétitifs."
+      },
+      "analytics": {
+        "title": "Analytics & Insights",
+        "description": "Accédez à des analytics détaillés et consolidés pour tous vos comptes. Visualisez vos performances, identifiez les tendances et prenez des décisions éclairées."
+      },
+      "workflow": {
+        "title": "Workflow de publication",
+        "description": "Planifiez et programmez vos publications avec un workflow optimisé. Gérez vos métadonnées, vos tags et vos descriptions depuis une interface centralisée."
+      },
+      "multiAccount": {
+        "title": "Gestion multi-comptes",
+        "description": "Connectez et gérez plusieurs comptes SoundCloud depuis un seul dashboard. Basculez facilement entre vos différents profils et centralisez vos opérations."
+      }
+    },
+    "about": {
+      "title": "Un outil en développement",
+      "paragraph1": "SoundCloud Label Manager est actuellement en phase de prototype. Cet outil est développé en interne par Kaitos pour nos clients partenaires dans l'industrie musicale.",
+      "paragraph2": "L'application n'est pas publique et sera uniquement utilisée en interne par les labels et artistes avec lesquels nous travaillons directement. Nous développons cet outil pour répondre aux besoins spécifiques de gestion de comptes SoundCloud multiples.",
+      "paragraph3": "Accès à l'API SoundCloud : Nous avons demandé l'accès à l'API fermée de SoundCloud pour pouvoir développer les fonctionnalités avancées nécessaires à cet outil, notamment l'authentification OAuth et les endpoints de gestion de compte étendus."
+    },
+    "ctaSection": {
+      "title": "Intéressé par cet outil ?",
+      "description": "Si vous êtes un label ou un artiste travaillant avec Kaitos et que vous souhaitez en savoir plus sur cet outil ou demander l'accès, contactez-nous pour plus d'informations."
+    }
+  },
+  "navigation": {
+    "solutions": "Solutions",
+    "sectors": "Secteurs",
+    "tech": "Tech"
+  }
+}
+

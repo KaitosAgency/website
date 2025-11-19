@@ -1,11 +1,17 @@
+"use client"
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tagline } from "@/components/ui/tagline";
 import { ArrowIcon } from "@/components/ui/arrow-icon";
 import { Navigation } from "@/components/ui/navigation";
+import { LanguageSelector } from "@/components/ui/language-selector";
+import { useI18n } from "@/lib/i18n";
 
 export default function Hero() {
+  const { t } = useI18n();
+  
   return (
     <section className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-secondary px-4">
       {/* Image de fond */}
@@ -26,21 +32,10 @@ export default function Hero() {
       <div className="absolute inset-0 h-[30%] bg-gradient-to-b from-secondary from-30% via-transparent via-55% to-transparent to-100% z-5"></div>
       {/* Overlay dégradé secondary en bas */}
       <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-secondary via-secondary via-30% to-transparent to-100% z-5"></div>
-      <Navigation />
       
       {/* Sélecteur de langues - Desktop seulement */}
       <div className="hidden md:flex gap-4 text-xs text-white/80 tracking-widest mt-3 absolute top-8 left-12 z-20">
-        <Link href="#" className="hover:text-white transition-colors" aria-label="Version française">
-          FR
-        </Link>
-        <span>|</span>
-        <Link href="#" className="hover:text-white transition-colors" aria-label="English version">
-          EN
-        </Link>
-        <span>|</span>
-        <Link href="#" className="hover:text-white transition-colors" aria-label="日本語版">
-          JP
-        </Link>
+        <LanguageSelector isDarkPage={true} />
       </div>
       
       {/* Overlay contenu Hero */}
@@ -54,17 +49,19 @@ export default function Hero() {
               </svg>
             ))}
           </div>
-          <Tagline>Le choix des pionniers</Tagline>
+          <Tagline>{t("home.tagline")}</Tagline>
         </div>
-        <h1 className="gradient-title text-[42px] md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black">Origine<br />de votre évolution</h1>
-        <p className="max-w-xs md:max-w-xl mx-auto drop-shadow text-offwhite font-extralight px-2">Kaitos est l'agence IA Française qui accompagne les entreprises à intégrer l'intelligence artificielle comme un axe de transformation stratégique, avec méthode, suivi et vision long terme.</p>
+        <h1 className="gradient-title text-[42px] md:text-7xl font-bold md:font-semibold drop-shadow-lg shadow-black whitespace-pre-line overflow-visible py-2">
+          {t("home.title")}
+        </h1>
+        <p className="max-w-xs md:max-w-xl mx-auto drop-shadow text-offwhite font-extralight px-2">{t("home.description")}</p>
         <div className="flex gap-4 justify-center mt-6">
           <Button variant="default" size="lg" className="bg-offwhite text-secondary hover:bg-primary hover:text-offwhite flex items-center gap-1">
-            Commencer aujourd'hui
+            {t("home.cta")}
             <ArrowIcon size={18} />
           </Button>
         </div>
       </div>
     </section>
   );
-} 
+}

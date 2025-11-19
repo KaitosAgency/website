@@ -28,7 +28,9 @@ export function ContentCard({
           {typeof icon === "string" ? <span>{icon}</span> : icon}
         </div>
       )}
-      <h3 className="text-2xl font-semibold text-offwhite mb-4">{title}</h3>
+      <h3 className="text-2xl text-offwhite mb-4">
+        {title}
+      </h3>
       <p className="text-offwhite/80 font-light mb-6 leading-relaxed">
         {description}
       </p>

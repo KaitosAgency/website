@@ -5,6 +5,8 @@ import "./globals.css";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Footer } from "@/app/components/footer";
 import { Navigation } from "@/components/ui/navigation";
+import { I18nProvider } from "@/lib/i18n";
+import { LanguageBanner } from "@/components/ui/language-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,13 +72,12 @@ export default function RootLayout({
         
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
-        {/* Bannière Site en construction */}
-        <div className="fixed top-0 left-0 right-0 h-5 bg-primary z-50 flex items-center justify-center">
-          <span className="text-white text-xs font-normal">Site en construction</span>
-        </div>
-        <Navigation />
-        {children}
-        <Footer />
+        <I18nProvider>
+          <LanguageBanner />
+          <Navigation />
+          {children}
+          <Footer />
+        </I18nProvider>
       </body>
     </html>
   );

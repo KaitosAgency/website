@@ -1,0 +1,77 @@
+{
+  "common": {
+    "siteUnderConstruction": "Site under construction",
+    "reserveCall": "Book a call"
+  },
+  "home": {
+    "tagline": "The choice of pioneers",
+    "title": "Origin\nof your evolution",
+    "description": "Kaitos is the French AI agency that helps companies integrate artificial intelligence as a strategic transformation axis, with method, follow-up and long-term vision.",
+    "cta": "Get started today"
+  },
+  "music": {
+    "tagline": "SoundCloud Management Tool",
+    "title": "Manage your\nSoundCloud accounts in one click",
+    "description": "A private dashboard allowing labels and artists to connect their SoundCloud accounts, view analytics, schedule publications and manage multiple profiles from a centralized interface.",
+    "cta": "Request access",
+    "learnMore": "Learn more",
+    "sectionTitle": "SoundCloud Label Manager: your management tool",
+    "sectionDescription": "An internal tool developed by Kaitos to help music labels and artists efficiently manage their multiple SoundCloud accounts with automation, analytics and optimized workflows.",
+    "forLabels": {
+      "title": "For music labels",
+      "description": "Simplify the management of your multiple SoundCloud accounts from a single interface. Centralize your operations, automate your workflows and optimize your presence on the platform.",
+      "items": [
+        "Centralized management of multiple accounts",
+        "Automated publication workflow",
+        "Detailed analytics and consolidated reports",
+        "Upload scheduling"
+      ]
+    },
+    "forArtists": {
+      "title": "For artists",
+      "description": "Efficiently manage your SoundCloud presence with professional tools. Track your performance, schedule your releases and optimize your content strategy.",
+      "items": [
+        "Secure account connection",
+        "Real-time analytics visualization",
+        "Publication scheduling",
+        "Simplified multi-profile management"
+      ]
+    },
+    "features": {
+      "title": "Key features",
+      "description": "Our tool offers all the features needed for professional management of your SoundCloud accounts, with automation and advanced insights.",
+      "automation": {
+        "title": "Automation",
+        "description": "Automate your publication and content management workflows. Schedule your uploads, manage your metadata and optimize your repetitive processes."
+      },
+      "analytics": {
+        "title": "Analytics & Insights",
+        "description": "Access detailed and consolidated analytics for all your accounts. Visualize your performance, identify trends and make informed decisions."
+      },
+      "workflow": {
+        "title": "Publication workflow",
+        "description": "Plan and schedule your publications with an optimized workflow. Manage your metadata, tags and descriptions from a centralized interface."
+      },
+      "multiAccount": {
+        "title": "Multi-account management",
+        "description": "Connect and manage multiple SoundCloud accounts from a single dashboard. Easily switch between your different profiles and centralize your operations."
+      }
+    },
+    "about": {
+      "title": "A tool in development",
+      "paragraph1": "SoundCloud Label Manager is currently in prototype phase. This tool is developed internally by Kaitos for our partner clients in the music industry.",
+      "paragraph2": "The application is not public and will only be used internally by labels and artists we work with directly. We are developing this tool to meet specific needs for managing multiple SoundCloud accounts.",
+      "paragraph3": "SoundCloud API Access: We have requested access to SoundCloud's closed API to develop the advanced features needed for this tool, including OAuth authentication and extended account management endpoints."
+    },
+    "ctaSection": {
+      "title": "Interested in this tool?",
+      "description": "If you are a label or artist working with Kaitos and would like to learn more about this tool or request access, contact us for more information."
+    }
+  },
+  "navigation": {
+    "solutions": "Solutions",
+    "sectors": "Sectors",
+    "tech": "Tech"
+  }
+}
+
