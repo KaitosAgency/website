@@ -8,11 +8,6 @@ import { Navigation } from "@/components/ui/navigation";
 export default function Hero() {
   return (
     <section className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-secondary px-4">
-      {/* Bannière Site en construction */}
-      <div className="absolute top-0 left-0 right-0 h-5 bg-primary z-20 flex items-center justify-center">
-        <span className="text-white text-xs font-normal">Site en construction</span>
-      </div>
-      
       {/* Image de fond */}
       <div className="absolute inset-0 w-full h-full -top-[92px] md:-top-[72px]">
         <Image

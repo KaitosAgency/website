@@ -20,6 +20,7 @@ export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isDarkPage = pathname === "/" || pathname === "/music";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,7 +37,7 @@ export function Navigation() {
       {/* Navigation principale - Desktop - Fixed et centrée */}
       <nav
         className={`hidden rounded-md px-12 py-2 md:flex fixed left-1/2 top-8 transform -translate-x-1/2 items-center justify-between z-30 transition-all duration-100 min-w-[1152px] ${
-          isHome
+          isDarkPage
             ? `!min-w-4 gap-12 bg-secondary ${isScrolled ? '' : 'border-none'}`
             : `bg-white ${isScrolled ? 'border border-secondary/10' : 'border border-white'}`
         }`}
@@ -45,7 +46,7 @@ export function Navigation() {
       >
         <Link href="/" className="flex-shrink-0">
           <Image
-            src={isHome ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
+            src={isDarkPage ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
             alt="Kaitos - Agence IA Française"
             width={120}
             height={32}
@@ -57,7 +58,7 @@ export function Navigation() {
             <Link
               key={item.name}
               href={item.href}
-              className={`${isHome ? 'text-white/80 hover:text-white' : 'text-secondary hover:text-primary'} transition-colors font-normal text-md`}
+              className={`${isDarkPage ? 'text-white/80 hover:text-white' : 'text-secondary hover:text-primary'} transition-colors font-normal text-md`}
               title={item.description}
             >
               {item.name}
@@ -66,7 +67,7 @@ export function Navigation() {
         </div>
         <Button
           variant="link"
-          className={`${isHome ? 'text-primary hover:text-offwhite' : 'text-secondary hover:text-primary'} font-medium flex items-center gap-1 p-0 text-md`}
+          className={`${isDarkPage ? 'text-primary hover:text-offwhite' : 'text-secondary hover:text-primary'} font-medium flex items-center gap-1 p-0 text-md`}
         >
           Réserver un appel
           <ArrowIcon size={14} />
@@ -83,8 +84,8 @@ export function Navigation() {
                 <span className="sr-only">Ouvrir le menu</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="left" isHome={isHome} className={`w-[300px] backdrop-blur-md border-r ${
-              isHome 
+            <SheetContent side="left" isHome={isDarkPage} className={`w-[300px] backdrop-blur-md border-r ${
+              isDarkPage 
                 ? 'bg-secondary/70 border-offwhite/10' 
                 : 'bg-offwhite/90 border-secondary/10'
             }`}>
@@ -92,10 +93,10 @@ export function Navigation() {
               <div className="flex flex-col h-full">
                 {/* Logo dans le menu mobile */}
                 <div className={`flex justify-center items-center py-6 border-b ${
-                  isHome ? 'border-white/10' : 'border-secondary/10'
+                  isDarkPage ? 'border-white/10' : 'border-secondary/10'
                 }`}>
                   <Image 
-                    src={isHome ? "/images/Logo/logo_kaitos_full_light.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
+                    src={isDarkPage ? "/images/Logo/logo_kaitos_full_light.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
                     alt="Kaitos" 
                     width={100} 
                     height={26}
@@ -104,20 +105,20 @@ export function Navigation() {
                 
                 {/* Sélection de langue mobile */}
                 <div className={`flex justify-center items-center gap-4 py-4 border-b ${
-                  isHome ? 'border-offwhite/10' : 'border-secondary/10'
+                  isDarkPage ? 'border-offwhite/10' : 'border-secondary/10'
                 }`}>
                   <div className={`flex gap-4 text-xs tracking-widest ${
-                    isHome ? 'text-offwhite/80' : 'text-secondary/80'
+                    isDarkPage ? 'text-offwhite/80' : 'text-secondary/80'
                   }`}>
-                    <button className={`font-medium ${isHome ? 'text-white' : 'text-secondary'}`} aria-label="Version française">
+                    <button className={`font-medium ${isDarkPage ? 'text-white' : 'text-secondary'}`} aria-label="Version française">
                       FR
                     </button>
-                    <span className={isHome ? 'text-white/40' : 'text-secondary/40'}>|</span>
-                    <button className={`hover:transition-colors ${isHome ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="English version">
+                    <span className={isDarkPage ? 'text-white/40' : 'text-secondary/40'}>|</span>
+                    <button className={`hover:transition-colors ${isDarkPage ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="English version">
                       EN
                     </button>
-                    <span className={isHome ? 'text-white/40' : 'text-secondary/40'}>|</span>
-                    <button className={`hover:transition-colors ${isHome ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="日本語版">
+                    <span className={isDarkPage ? 'text-white/40' : 'text-secondary/40'}>|</span>
+                    <button className={`hover:transition-colors ${isDarkPage ? 'hover:text-white' : 'hover:text-secondary'}`} aria-label="日本語版">
                       JP
                     </button>
                   </div>
@@ -131,7 +132,7 @@ export function Navigation() {
                         <Link
                           href={item.href}
                           className={`block text-lg font-light transition-colors ${
-                            isHome ? 'text-white/90 hover:text-white' : 'text-secondary/90 hover:text-secondary'
+                            isDarkPage ? 'text-white/90 hover:text-white' : 'text-secondary/90 hover:text-secondary'
                           }`}
                           onClick={() => setIsMobileMenuOpen(false)} 
                           title={item.description}
@@ -145,7 +146,7 @@ export function Navigation() {
                 
                 {/* Bouton CTA mobile */}
                 <div className={`border-t pt-6 ${
-                  isHome ? 'border-white/10' : 'border-secondary/10'
+                  isDarkPage ? 'border-white/10' : 'border-secondary/10'
                 }`}>
                   <Button 
                     variant="default" 
@@ -164,7 +165,7 @@ export function Navigation() {
         <div className="md:hidden flex-1 flex justify-center">
           <Link href="/">
             <Image 
-              src={isHome ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
+              src={isDarkPage ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
               alt="Kaitos" 
               width={100} 
               height={26}

@@ -70,6 +70,10 @@ export default function RootLayout({
         
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
+        {/* Bannière Site en construction */}
+        <div className="fixed top-0 left-0 right-0 h-5 bg-primary z-50 flex items-center justify-center">
+          <span className="text-white text-xs font-normal">Site en construction</span>
+        </div>
         <Navigation />
         {children}
         <Footer />
