@@ -19,62 +19,92 @@ export function AuthButton({ isDarkPage = false }: AuthButtonProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const supabase = createClient()
+    let supabase: any = null
+    let subscription: any = null
+
+    try {
+      supabase = createClient()
+    } catch (error) {
+      // Si les variables d'environnement ne sont pas configurées, on ne peut pas initialiser Supabase
+      console.error('Failed to initialize Supabase client:', error)
+      setLoading(false)
+      return
+    }
 
     // Vérifier l'utilisateur actuel
     const checkUser = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (currentUser) {
-        setUser(currentUser)
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser()
         
-        // Récupérer le profil utilisateur
-        const { data: userProfile } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single()
-        
-        if (userProfile) {
-          setProfile(userProfile)
+        if (currentUser) {
+          setUser(currentUser)
+          
+          // Récupérer le profil utilisateur
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single()
+          
+          if (userProfile) {
+            setProfile(userProfile)
+          }
         }
+      } catch (error) {
+        console.error('Error checking user:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      setLoading(false)
     }
 
     checkUser()
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user)
-        // Récupérer le profil
-        supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) setProfile(data)
-          })
-      } else {
-        setUser(null)
-        setProfile(null)
-      }
-      setLoading(false)
-    })
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        if (session?.user) {
+          setUser(session.user)
+          // Récupérer le profil
+          supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+            .then(({ data }: any) => {
+              if (data) setProfile(data)
+            })
+            .catch((err: any) => console.error('Error fetching profile:', err))
+        } else {
+          setUser(null)
+          setProfile(null)
+        }
+        setLoading(false)
+      })
+
+      subscription = authSubscription
+    } catch (error) {
+      console.error('Error setting up auth listener:', error)
+    }
 
     return () => {
-      subscription.unsubscribe()
+      if (subscription) {
+        subscription.unsubscribe()
+      }
     }
   }, [router])
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Error signing out:', error)
+      // Rediriger quand même vers la page d'accueil
+      router.push('/')
+      router.refresh()
+    }
   }
 
   if (loading) {
