@@ -13,7 +13,7 @@
     "tagline": "SoundCloud管理ツール",
     "title": "ワンクリックで\nSoundCloudアカウントを管理",
     "description": "レーベルとアーティストがSoundCloudアカウントを接続し、分析を表示し、公開をスケジュールし、一元化されたインターフェースから複数のプロフィールを管理できるプライベートダッシュボード。",
-    "cta": "アクセスをリクエスト",
+    "cta": "Soundcloudに接続",
     "learnMore": "詳細を見る",
     "sectionTitle": "SoundCloud Label Manager：あなたの管理ツール",
     "sectionDescription": "Kaitosが開発した内部ツールで、音楽レーベルとアーティストが自動化、分析、最適化されたワークフローで複数のSoundCloudアカウントを効率的に管理できるようにします。",
@@ -71,7 +71,7 @@
   "navigation": {
     "solutions": "ソリューション",
     "sectors": "セクター",
-    "tech": "テクノロジー"
+    "music": "音楽"
   }
 }
 

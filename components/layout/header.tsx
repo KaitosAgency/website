@@ -5,23 +5,30 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
-import { Menu, X } from "lucide-react"
+import { Menu } from "lucide-react"
 import { ArrowIcon } from "@/components/ui/arrow-icon"
 import { usePathname } from "next/navigation"
 import { useI18n } from "@/lib/i18n"
+import { AuthButton } from "@/components/auth/auth-button"
+import { LanguageSelector } from "@/components/layout/language-selector"
 
-export function Navigation() {
+export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const pathname = usePathname();
-  const isHome = pathname === "/";
-  const isDarkPage = pathname === "/" || pathname === "/music";
-  const { language, setLanguage, t } = useI18n();
+  const pathname = usePathname()
+  const isHome = pathname === "/"
+  const isDarkPage = pathname === "/" || pathname === "/music"
+  const { language, setLanguage, t } = useI18n()
+
+  // Ne pas afficher sur les pages d'authentification
+  if (pathname?.startsWith('/auth')) {
+    return null
+  }
 
   const navigationItems = [
     { name: t("navigation.solutions"), href: "#solutions", description: "Découvrez nos solutions IA" },
     { name: t("navigation.sectors"), href: "#secteurs", description: "Secteurs d'activité" },
-    { name: t("navigation.tech"), href: "#tech", description: "Technologies et expertise" },
+    { name: t("navigation.music"), href: "/music", description: "Musique" },
   ]
 
   useEffect(() => {
@@ -40,52 +47,65 @@ export function Navigation() {
 
   return (
     <>
-      {/* Navigation principale - Desktop - Fixed et centrée */}
-      <nav
-        className={`hidden rounded-md px-12 py-2 md:flex fixed left-1/2 top-8 transform -translate-x-1/2 items-center justify-between z-30 transition-all duration-100 min-w-[1152px] ${
-          isDarkPage
-            ? `!min-w-4 gap-12 bg-secondary ${isScrolled ? '' : 'border-none'}`
-            : `bg-white ${isScrolled ? 'border border-secondary/10' : 'border border-white'}`
-        }`}
-        role="navigation"
-        aria-label="Navigation principale"
-      >
-        <Link href="/" className="flex-shrink-0">
-          <Image
-            src={isDarkPage ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
-            alt="Kaitos - Agence IA Française"
-            width={120}
-            height={32}
-            priority
-          />
-        </Link>
-        <div className="flex items-center gap-12">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`${isDarkPage ? 'text-white/80 hover:text-white' : 'text-secondary hover:text-primary'} transition-colors font-normal text-md`}
-              title={item.description}
-            >
-              {item.name}
-            </Link>
-          ))}
+      {/* Header Desktop */}
+      <header className="hidden md:block fixed top-0 left-0 right-0 z-30 pointer-events-none">
+        {/* Sélecteur de langues - En haut à gauche */}
+        <div className="absolute top-8 left-12 z-20 pointer-events-auto">
+          <LanguageSelector isDarkPage={isDarkPage} />
         </div>
-        <Button
-          variant="link"
-          className={`${isDarkPage ? 'text-primary hover:text-offwhite' : 'text-secondary hover:text-primary'} font-medium flex items-center gap-1 p-0 text-md`}
-        >
-          {t("common.reserveCall")}
-          <ArrowIcon size={14} />
-        </Button>
-      </nav>
 
-      {/* Menu mobile */}
-      <header className="absolute top-0 left-0 w-full flex items-center justify-between px-6 md:px-12 pt-8 z-20 md:hidden">
-        <div className="md:hidden">
+        {/* Navigation principale - Centrée */}
+        <nav
+          className={`absolute left-1/2 top-8 transform -translate-x-1/2 rounded-md px-12 py-2 flex items-center justify-between z-30 transition-all duration-100 min-w-[1152px] pointer-events-auto ${
+            isDarkPage
+              ? `!min-w-4 gap-12 bg-secondary ${isScrolled ? '' : 'border-none'}`
+              : `bg-white ${isScrolled ? 'border border-secondary/10' : 'border border-white'}`
+          }`}
+          role="navigation"
+          aria-label="Navigation principale"
+        >
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src={isDarkPage ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
+              alt="Kaitos - Agence IA Française"
+              width={120}
+              height={32}
+              priority
+            />
+          </Link>
+          <div className="flex items-center gap-12">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`${isDarkPage ? 'text-white/80 hover:text-white' : 'text-secondary hover:text-primary'} transition-colors font-normal text-md`}
+                title={item.description}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+          <Button
+            variant="link"
+            className={`${isDarkPage ? 'text-primary hover:text-offwhite' : 'text-secondary hover:text-primary'} font-medium flex items-center gap-1 p-0 text-md`}
+          >
+            {t("common.reserveCall")}
+            <ArrowIcon size={14} />
+          </Button>
+        </nav>
+
+        {/* Bouton de connexion - En haut à droite */}
+        <div className="absolute top-8 right-12 z-20 pointer-events-auto">
+          <AuthButton isDarkPage={isDarkPage} />
+        </div>
+      </header>
+
+      {/* Header Mobile */}
+      <header className="md:hidden absolute top-0 left-0 w-full flex items-center justify-between px-6 pt-8 z-20">
+        <div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <button className="text-primary hover:bg-offwhite/10 py-2 md:py-6 pr-6 pl-2 min-w-0 flex items-center justify-center rounded-md transition-colors">
+              <button className="text-primary hover:bg-offwhite/10 py-2 pr-6 pl-2 min-w-0 flex items-center justify-center rounded-md transition-colors">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Ouvrir le menu</span>
               </button>
@@ -174,10 +194,13 @@ export function Navigation() {
                   </ul>
                 </nav>
                 
-                {/* Bouton CTA mobile */}
-                <div className={`border-t pt-6 ${
+                {/* Authentification mobile */}
+                <div className={`border-t pt-6 pb-4 space-y-4 ${
                   isDarkPage ? 'border-white/10' : 'border-secondary/10'
                 }`}>
+                  <div className="flex justify-center">
+                    <AuthButton isDarkPage={isDarkPage} />
+                  </div>
                   <Button 
                     variant="default" 
                     className="w-full bg-primary text-offwhite hover:bg-offwhite hover:text-secondary"
@@ -192,7 +215,7 @@ export function Navigation() {
         </div>
 
         {/* Logo mobile centré */}
-        <div className="md:hidden flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center">
           <Link href="/">
             <Image 
               src={isDarkPage ? "/images/Logo/logo_kaitos_full.svg" : "/images/Logo/logo_kaitos_full_dark.svg"}
@@ -204,9 +227,12 @@ export function Navigation() {
           </Link>
         </div>
         
-        {/* Élément invisible pour équilibrer le layout mobile */}
-        <div className="md:hidden px-[32px]"></div>
+        {/* Bouton de connexion mobile - En haut à droite */}
+        <div className="px-2">
+          <AuthButton isDarkPage={isDarkPage} />
+        </div>
       </header>
     </>
   )
 }
+

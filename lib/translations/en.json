@@ -13,7 +13,7 @@
     "tagline": "SoundCloud Management Tool",
     "title": "Manage your\nSoundCloud accounts in one click",
     "description": "A private dashboard allowing labels and artists to connect their SoundCloud accounts, view analytics, schedule publications and manage multiple profiles from a centralized interface.",
-    "cta": "Request access",
+    "cta": "Connect Soundcloud",
     "learnMore": "Learn more",
     "sectionTitle": "SoundCloud Label Manager: your management tool",
     "sectionDescription": "An internal tool developed by Kaitos to help music labels and artists efficiently manage their multiple SoundCloud accounts with automation, analytics and optimized workflows.",
@@ -71,7 +71,7 @@
   "navigation": {
     "solutions": "Solutions",
     "sectors": "Sectors",
-    "tech": "Tech"
+    "music": "Music"
   }
 }
 

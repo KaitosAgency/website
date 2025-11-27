@@ -3,10 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Footer } from "@/app/components/footer";
-import { Navigation } from "@/components/ui/navigation";
+import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
 import { I18nProvider } from "@/lib/i18n";
-import { LanguageBanner } from "@/components/ui/language-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,10 +71,9 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
         <I18nProvider>
-          <LanguageBanner />
-          <Navigation />
-          {children}
-          <Footer />
+          <DashboardWrapper>
+            {children}
+          </DashboardWrapper>
         </I18nProvider>
       </body>
     </html>

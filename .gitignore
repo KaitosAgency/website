@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cursor mcp config (contient des tokens sensibles)
+.cursor/mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

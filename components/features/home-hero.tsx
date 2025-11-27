@@ -3,10 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Tagline } from "@/components/ui/tagline";
+import { Tagline } from "@/components/features/tagline";
 import { ArrowIcon } from "@/components/ui/arrow-icon";
-import { Navigation } from "@/components/ui/navigation";
-import { LanguageSelector } from "@/components/ui/language-selector";
 import { useI18n } from "@/lib/i18n";
 
 export default function Hero() {
@@ -32,11 +30,6 @@ export default function Hero() {
       <div className="absolute inset-0 h-[30%] bg-gradient-to-b from-secondary from-30% via-transparent via-55% to-transparent to-100% z-5"></div>
       {/* Overlay dégradé secondary en bas */}
       <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-secondary via-secondary via-30% to-transparent to-100% z-5"></div>
-      
-      {/* Sélecteur de langues - Desktop seulement */}
-      <div className="hidden md:flex gap-4 text-xs text-white/80 tracking-widest mt-3 absolute top-8 left-12 z-20">
-        <LanguageSelector isDarkPage={true} />
-      </div>
       
       {/* Overlay contenu Hero */}
       <div className="relative z-10 flex flex-col items-center justify-end w-full h-full text-white text-center gap-4 pb-16">

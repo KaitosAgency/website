@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Tagline } from "./tagline";
-import { Button } from "./button";
-import { ArrowIcon } from "./arrow-icon";
+import { Tagline } from "@/components/features/tagline";
+import { Button } from "@/components/ui/button";
+import { ArrowIcon } from "@/components/ui/arrow-icon";
 
 interface HeroSectionProps {
   imageSrc: string;
@@ -12,6 +12,7 @@ interface HeroSectionProps {
   description: string;
   ctaText?: string;
   ctaHref?: string;
+  ctaOnClick?: () => void;
   showStars?: boolean;
   overlayIntensity?: "light" | "medium" | "strong";
   className?: string;
@@ -25,6 +26,7 @@ export function HeroSection({
   description,
   ctaText,
   ctaHref,
+  ctaOnClick,
   showStars = true,
   overlayIntensity = "medium",
   className = "",
@@ -97,18 +99,19 @@ export function HeroSection({
               variant="default" 
               size="lg" 
               className="bg-offwhite text-secondary hover:bg-primary hover:text-offwhite flex items-center gap-1 shadow-lg"
-              asChild={!!ctaHref}
+              asChild={!!ctaHref && !ctaOnClick}
+              onClick={ctaOnClick}
             >
-              {ctaHref ? (
+              {ctaHref && !ctaOnClick ? (
                 <a href={ctaHref}>
                   {ctaText}
                   <ArrowIcon size={18} />
                 </a>
               ) : (
-                <>
+                <span>
                   {ctaText}
                   <ArrowIcon size={18} />
-                </>
+                </span>
               )}
             </Button>
           </div>
