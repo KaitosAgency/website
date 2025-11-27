@@ -71,6 +71,7 @@ export async function GET(request: Request) {
 
     console.log('Token data received:', Object.keys(tokenData));
     const accessToken = tokenData.access_token;
+    const refreshToken = tokenData.refresh_token;
 
     if (!accessToken) {
       console.error('No access token in response:', tokenData);
@@ -101,12 +102,19 @@ export async function GET(request: Request) {
     
     if (supabaseUser) {
       // Stocker le token SoundCloud dans la base de données
+      const updateData: any = {
+        soundcloud_access_token: accessToken,
+        soundcloud_user_id: userData.id?.toString() || null,
+      };
+
+      // Ajouter le refresh token s'il est disponible
+      if (refreshToken) {
+        updateData.soundcloud_refresh_token = refreshToken;
+      }
+
       await supabase
         .from('user_profiles')
-        .update({
-          soundcloud_access_token: accessToken,
-          soundcloud_user_id: userData.id?.toString() || null,
-        })
+        .update(updateData)
         .eq('id', supabaseUser.id);
     }
 

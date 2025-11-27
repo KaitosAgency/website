@@ -9,7 +9,8 @@ import {
   Settings, 
   LogOut, 
   User,
-  HelpCircle
+  HelpCircle,
+  Music
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +22,7 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
   { name: 'Tableau de bord', href: '/music/dashboard', icon: LayoutDashboard },
+  { name: 'SoundCloud', href: '/music/dashboard/soundcloud', icon: Music },
 ]
 
 const bottomItems: SidebarItem[] = [

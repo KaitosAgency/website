@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      soundcloud: {
+        Row: {
+          created_at: string | null
+          id: string
+          styles: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          styles?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          styles?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soundcloud_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           automation: boolean
@@ -24,6 +56,7 @@ export type Database = {
           id: string
           provider: string | null
           soundcloud_access_token: string | null
+          soundcloud_refresh_token: string | null
           soundcloud_user_id: string | null
           updated_at: string
         }
@@ -36,6 +69,7 @@ export type Database = {
           id: string
           provider?: string | null
           soundcloud_access_token?: string | null
+          soundcloud_refresh_token?: string | null
           soundcloud_user_id?: string | null
           updated_at?: string
         }
@@ -48,6 +82,7 @@ export type Database = {
           id?: string
           provider?: string | null
           soundcloud_access_token?: string | null
+          soundcloud_refresh_token?: string | null
           soundcloud_user_id?: string | null
           updated_at?: string
         }
@@ -196,3 +231,8 @@ export const Constants = {
 export type UserProfile = Tables<'user_profiles'>
 export type UserProfileInsert = TablesInsert<'user_profiles'>
 export type UserProfileUpdate = TablesUpdate<'user_profiles'>
+
+// Type helper pour soundcloud
+export type SoundCloudConfig = Tables<'soundcloud'>
+export type SoundCloudConfigInsert = TablesInsert<'soundcloud'>
+export type SoundCloudConfigUpdate = TablesUpdate<'soundcloud'>

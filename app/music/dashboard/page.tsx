@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 
 interface SoundCloudUser {
   id: number;
@@ -68,6 +69,7 @@ export default function MusicDashboard() {
             }
           } catch (err) {
             console.error('Erreur SoundCloud:', err);
+            toast.error('Erreur lors du chargement des données SoundCloud');
           }
         };
         reloadSoundCloud();
@@ -142,6 +144,7 @@ export default function MusicDashboard() {
       }
     } catch (err) {
       console.error('Erreur lors du chargement de l\'automation:', err);
+      toast.error('Erreur lors du chargement de l\'automation');
     }
   };
 
@@ -159,13 +162,18 @@ export default function MusicDashboard() {
       if (response.ok) {
         const data = await response.json();
         setAutomation(data.automation);
+        toast.success(`Automation ${data.automation ? 'activée' : 'désactivée'}`);
       } else {
-        console.error('Erreur lors de la mise à jour de l\'automation');
+        const errorMessage = 'Erreur lors de la mise à jour de l\'automation';
+        console.error(errorMessage);
+        toast.error(errorMessage);
         // Revenir à l'état précédent en cas d'erreur
         setAutomation(!checked);
       }
     } catch (err) {
-      console.error('Erreur lors de la mise à jour de l\'automation:', err);
+      const errorMessage = 'Erreur lors de la mise à jour de l\'automation';
+      console.error(errorMessage, err);
+      toast.error(errorMessage);
       // Revenir à l'état précédent en cas d'erreur
       setAutomation(!checked);
     } finally {
@@ -197,33 +205,44 @@ export default function MusicDashboard() {
       // Toujours définir le statut, même en cas d'erreur HTTP
       if (response.ok) {
         setTokenStatus(data);
+        if (data.valid) {
+          toast.success('Token SoundCloud valide');
+        } else {
+          toast.error('Token SoundCloud invalide');
+        }
       } else {
         console.error('Erreur vérification token:', data);
+        const errorMessage = data.message || data.error || 'Erreur lors de la vérification';
         // Si c'est une erreur 401 ou 404, on considère qu'il faut se réauthentifier
         setTokenStatus({
           valid: false,
           connected: false,
-          message: data.message || data.error || 'Erreur lors de la vérification',
+          message: errorMessage,
           needsReauth: response.status === 401 || response.status === 404,
         });
+        toast.error(errorMessage);
       }
     } catch (err: any) {
       console.error('Erreur lors de la vérification du token:', err);
+      let errorMessage = 'Erreur de connexion lors de la vérification';
       if (err.name === 'AbortError') {
+        errorMessage = 'Timeout - La vérification a pris trop de temps';
         setTokenStatus({
           valid: false,
           connected: false,
-          message: 'Timeout - La vérification a pris trop de temps',
+          message: errorMessage,
           needsReauth: true,
         });
       } else {
+        errorMessage = err.message || errorMessage;
         setTokenStatus({
           valid: false,
           connected: false,
-          message: err.message || 'Erreur de connexion lors de la vérification',
+          message: errorMessage,
           needsReauth: true,
         });
       }
+      toast.error(errorMessage);
     } finally {
       setCheckingToken(false);
     }

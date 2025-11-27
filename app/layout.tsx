@@ -5,6 +5,7 @@ import "./globals.css";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
 import { I18nProvider } from "@/lib/i18n";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,11 +71,13 @@ export default function RootLayout({
         
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
-        <I18nProvider>
-          <DashboardWrapper>
-            {children}
-          </DashboardWrapper>
-        </I18nProvider>
+        <Toaster>
+          <I18nProvider>
+            <DashboardWrapper>
+              {children}
+            </DashboardWrapper>
+          </I18nProvider>
+        </Toaster>
       </body>
     </html>
   );

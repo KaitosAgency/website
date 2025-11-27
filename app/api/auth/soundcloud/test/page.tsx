@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 
 export default function SoundCloudTestPage() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
@@ -51,7 +52,7 @@ export default function SoundCloudTestPage() {
           <Button
             onClick={() => {
               navigator.clipboard.writeText(debugInfo.soundcloudUrl);
-              alert('URL copiée !');
+              toast.success('URL copiée !');
             }}
             className="mr-4"
           >
