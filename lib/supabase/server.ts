@@ -7,8 +7,13 @@ export async function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    const isProduction = process.env.NODE_ENV === 'production'
+    const envHint = isProduction
+      ? 'Please configure these variables in your deployment platform (Vercel, Netlify, etc.)'
+      : 'Please check your .env.local file'
+    
     throw new Error(
-      'Missing Supabase environment variables. Please check your .env.local file.\n' +
+      `Missing Supabase environment variables. ${envHint}.\n` +
       'Required variables:\n' +
       '  - NEXT_PUBLIC_SUPABASE_URL\n' +
       '  - NEXT_PUBLIC_SUPABASE_ANON_KEY\n\n' +
