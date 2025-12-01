@@ -64,10 +64,10 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Récupérer le profil utilisateur avec le token SoundCloud
+    // Récupérer le profil utilisateur et les données SoundCloud
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('soundcloud_access_token, soundcloud_user_id, email, fullname')
+      .select('email, fullname')
       .eq('id', user.id)
       .single();
 
@@ -79,12 +79,19 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Mettre à jour l'automation dans user_profiles
+    // Récupérer les données SoundCloud existantes
+    const { data: soundcloudUserData, error: soundcloudError } = await supabase
+      .from('soundcloud_users')
+      .select('access_token, automation')
+      .eq('user_id', user.id)
+      .single();
+
+    // Mettre à jour l'automation dans soundcloud_users
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('soundcloud_users')
       .update({ automation })
-      .eq('id', user.id)
-      .select()
+      .eq('user_id', user.id)
+      .select('automation')
       .single();
 
     if (error) {
@@ -96,28 +103,28 @@ export async function PATCH(request: Request) {
     }
 
     // Si automation est activé et qu'on a un token SoundCloud, envoyer à N8N
-    if (automation && profile.soundcloud_access_token) {
+    if (automation && soundcloudUserData?.access_token) {
       try {
         await sendToN8N({
           userId: user.id,
           email: profile.email,
           fullname: profile.fullname,
-          soundcloudAccessToken: profile.soundcloud_access_token,
-          soundcloudUserId: profile.soundcloud_user_id,
+          soundcloudAccessToken: soundcloudUserData.access_token,
+          soundcloudUserId: null, // On n'a plus cette info directement, à récupérer depuis l'API SoundCloud si nécessaire
           action: 'automation_enabled',
         });
       } catch (n8nError) {
         console.error('Error sending to N8N:', n8nError);
         // On continue même si l'envoi à N8N échoue
       }
-    } else if (!automation && profile.soundcloud_access_token) {
+    } else if (!automation && soundcloudUserData?.access_token) {
       // Si automation est désactivé, notifier N8N
       try {
         await sendToN8N({
           userId: user.id,
           email: profile.email,
-          soundcloudAccessToken: profile.soundcloud_access_token,
-          soundcloudUserId: profile.soundcloud_user_id,
+          soundcloudAccessToken: soundcloudUserData.access_token,
+          soundcloudUserId: null,
           action: 'automation_disabled',
         });
       } catch (n8nError) {
@@ -125,7 +132,7 @@ export async function PATCH(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, automation: data.automation });
+    return NextResponse.json({ success: true, automation: data?.automation || false });
   } catch (error: any) {
     console.error('Error in automation route:', error);
     return NextResponse.json(
@@ -149,14 +156,18 @@ export async function GET() {
       );
     }
 
-    // Récupérer l'automation depuis user_profiles
+    // Récupérer l'automation depuis soundcloud_users
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('soundcloud_users')
       .select('automation')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) {
+      // Si l'utilisateur n'a pas encore d'entrée dans soundcloud_users, retourner false
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ automation: false });
+      }
       console.error('Error fetching automation:', error);
       return NextResponse.json(
         { error: 'Failed to fetch automation' },

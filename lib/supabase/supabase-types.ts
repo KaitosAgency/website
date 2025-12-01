@@ -14,31 +14,46 @@ export type Database = {
   }
   public: {
     Tables: {
-      soundcloud: {
+      soundcloud_users: {
         Row: {
+          access_token: string | null
+          automation: boolean
           created_at: string | null
+          follow_unfollow: boolean
           id: string
+          max_followings: number | null
+          refresh_token: string | null
           styles: Json | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          access_token?: string | null
+          automation?: boolean
           created_at?: string | null
+          follow_unfollow?: boolean
           id?: string
+          max_followings?: number | null
+          refresh_token?: string | null
           styles?: Json | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          access_token?: string | null
+          automation?: boolean
           created_at?: string | null
+          follow_unfollow?: boolean
           id?: string
+          max_followings?: number | null
+          refresh_token?: string | null
           styles?: Json | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "soundcloud_user_id_fkey"
+            foreignKeyName: "soundcloud_users_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
@@ -48,42 +63,33 @@ export type Database = {
       }
       user_profiles: {
         Row: {
-          automation: boolean
           avatar_url: string | null
           created_at: string
           email: string
           fullname: string | null
           id: string
           provider: string | null
-          soundcloud_access_token: string | null
-          soundcloud_refresh_token: string | null
-          soundcloud_user_id: string | null
+          type: string
           updated_at: string
         }
         Insert: {
-          automation?: boolean
           avatar_url?: string | null
           created_at?: string
           email: string
           fullname?: string | null
           id: string
           provider?: string | null
-          soundcloud_access_token?: string | null
-          soundcloud_refresh_token?: string | null
-          soundcloud_user_id?: string | null
+          type?: string
           updated_at?: string
         }
         Update: {
-          automation?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string
           fullname?: string | null
           id?: string
           provider?: string | null
-          soundcloud_access_token?: string | null
-          soundcloud_refresh_token?: string | null
-          soundcloud_user_id?: string | null
+          type?: string
           updated_at?: string
         }
         Relationships: []
@@ -232,7 +238,7 @@ export type UserProfile = Tables<'user_profiles'>
 export type UserProfileInsert = TablesInsert<'user_profiles'>
 export type UserProfileUpdate = TablesUpdate<'user_profiles'>
 
-// Type helper pour soundcloud
-export type SoundCloudConfig = Tables<'soundcloud'>
-export type SoundCloudConfigInsert = TablesInsert<'soundcloud'>
-export type SoundCloudConfigUpdate = TablesUpdate<'soundcloud'>
+// Type helper pour soundcloud_users
+export type SoundCloudUser = Tables<'soundcloud_users'>
+export type SoundCloudUserInsert = TablesInsert<'soundcloud_users'>
+export type SoundCloudUserUpdate = TablesUpdate<'soundcloud_users'>

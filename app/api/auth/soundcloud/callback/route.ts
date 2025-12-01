@@ -101,21 +101,38 @@ export async function GET(request: Request) {
     const { data: { user: supabaseUser } } = await supabase.auth.getUser();
     
     if (supabaseUser) {
-      // Stocker le token SoundCloud dans la base de données
+      // Vérifier si une entrée existe déjà dans soundcloud_users
+      const { data: existingSoundcloudUser } = await supabase
+        .from('soundcloud_users')
+        .select('automation')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      // Préparer les données à insérer/mettre à jour
       const updateData: any = {
-        soundcloud_access_token: accessToken,
-        soundcloud_user_id: userData.id?.toString() || null,
+        access_token: accessToken,
+        automation: existingSoundcloudUser?.automation || false,
       };
 
       // Ajouter le refresh token s'il est disponible
       if (refreshToken) {
-        updateData.soundcloud_refresh_token = refreshToken;
+        updateData.refresh_token = refreshToken;
       }
 
-      await supabase
-        .from('user_profiles')
-        .update(updateData)
-        .eq('id', supabaseUser.id);
+      // Mettre à jour ou insérer dans la table soundcloud_users
+      const { error: upsertError } = await supabase
+        .from('soundcloud_users')
+        .upsert({
+          user_id: supabaseUser.id,
+          ...updateData,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (upsertError) {
+        console.error('Error upserting soundcloud_users:', upsertError);
+      }
     }
 
     // Stocker le token et les données utilisateur dans des cookies sécurisés

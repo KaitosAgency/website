@@ -15,23 +15,23 @@ export async function GET(request: Request) {
       );
     }
 
-    // Récupérer le token SoundCloud depuis la base de données
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('soundcloud_access_token, soundcloud_refresh_token, soundcloud_user_id')
-      .eq('id', user.id)
+    // Récupérer le token SoundCloud depuis la table soundcloud_users
+    const { data: soundcloudUserData, error: soundcloudError } = await supabase
+      .from('soundcloud_users')
+      .select('access_token, refresh_token')
+      .eq('user_id', user.id)
       .single();
 
-    if (profileError || !profile) {
+    if (soundcloudError || !soundcloudUserData) {
       return NextResponse.json({
         valid: false,
         connected: false,
-        message: 'Profil utilisateur non trouvé',
+        message: 'Aucun token SoundCloud trouvé. Veuillez vous connecter à SoundCloud.',
         needsReauth: true,
       });
     }
 
-    if (!profile.soundcloud_access_token) {
+    if (!soundcloudUserData.access_token) {
       return NextResponse.json({
         valid: false,
         connected: false,
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     }
 
     // Utiliser le token actuel
-    const accessToken = profile.soundcloud_access_token;
+    const accessToken = soundcloudUserData.access_token;
 
     // Vérifier la validité du token en appelant l'API SoundCloud
     try {
@@ -62,32 +62,32 @@ export async function GET(request: Request) {
         });
       } else if (userResponse.status === 401) {
         // Token invalide ou expiré - essayer de rafraîchir si on a un refresh token
-        if (profile.soundcloud_refresh_token) {
+        if (soundcloudUserData.refresh_token) {
           try {
             // Appeler l'Edge Function pour rafraîchir le token
             const { data: tokenData, error: tokenError } = await supabase.functions.invoke('soundcloud-auth', {
               body: {
                 action: 'refresh_token',
-                refresh_token: profile.soundcloud_refresh_token,
+                refresh_token: soundcloudUserData.refresh_token,
               },
             });
 
             if (!tokenError && tokenData?.access_token) {
               const { access_token, refresh_token } = tokenData;
 
-              // Mettre à jour le token dans la base de données
+              // Mettre à jour le token dans la table soundcloud_users
               const updateData: any = {
-                soundcloud_access_token: access_token,
+                access_token: access_token,
               };
 
               if (refresh_token) {
-                updateData.soundcloud_refresh_token = refresh_token;
+                updateData.refresh_token = refresh_token;
               }
 
               await supabase
-                .from('user_profiles')
+                .from('soundcloud_users')
                 .update(updateData)
-                .eq('id', user.id);
+                .eq('user_id', user.id);
 
               // Re-vérifier avec le nouveau token
               const retryResponse = await fetch('https://api.soundcloud.com/me', {
@@ -116,7 +116,7 @@ export async function GET(request: Request) {
           valid: false,
           connected: true,
           message: 'Token invalide ou expiré',
-          needsReauth: !profile.soundcloud_refresh_token, // Ne pas demander de réauth si on peut rafraîchir
+          needsReauth: !soundcloudUserData.refresh_token, // Ne pas demander de réauth si on peut rafraîchir
         });
       } else {
         return NextResponse.json({

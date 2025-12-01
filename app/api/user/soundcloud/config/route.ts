@@ -17,7 +17,7 @@ export async function GET() {
 
     // Récupérer la configuration SoundCloud de l'utilisateur
     const { data, error } = await supabase
-      .from('soundcloud')
+      .from('soundcloud_users')
       .select('*')
       .eq('user_id', user.id)
       .single();
@@ -56,25 +56,47 @@ export async function POST(request: Request) {
       );
     }
 
-    const { styles } = await request.json();
+    const { styles, max_followings, follow_unfollow } = await request.json();
 
-    if (!Array.isArray(styles)) {
-      return NextResponse.json(
-        { error: 'Styles must be an array' },
-        { status: 400 }
-      );
+    // Valider styles si fourni
+    if (styles !== undefined) {
+      if (!Array.isArray(styles)) {
+        return NextResponse.json(
+          { error: 'Styles must be an array' },
+          { status: 400 }
+        );
+      }
+
+      if (styles.length > 3) {
+        return NextResponse.json(
+          { error: 'Maximum 3 styles allowed' },
+          { status: 400 }
+        );
+      }
     }
 
-    if (styles.length > 3) {
+    // Valider max_followings si fourni
+    if (max_followings !== undefined && max_followings !== null) {
+      const maxFollowingsNum = parseInt(max_followings, 10);
+      if (isNaN(maxFollowingsNum) || maxFollowingsNum < 0) {
+        return NextResponse.json(
+          { error: 'max_followings must be a positive integer or null' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Valider follow_unfollow si fourni
+    if (follow_unfollow !== undefined && typeof follow_unfollow !== 'boolean') {
       return NextResponse.json(
-        { error: 'Maximum 3 styles allowed' },
+        { error: 'follow_unfollow must be a boolean' },
         { status: 400 }
       );
     }
 
     // Vérifier si une configuration existe déjà
     const { data: existingConfig } = await supabase
-      .from('soundcloud')
+      .from('soundcloud_users')
       .select('id')
       .eq('user_id', user.id)
       .single();
@@ -82,9 +104,20 @@ export async function POST(request: Request) {
     let result;
     if (existingConfig) {
       // Mettre à jour la configuration existante
+      const updateData: any = {};
+      if (styles !== undefined) {
+        updateData.styles = styles;
+      }
+      if (max_followings !== undefined) {
+        updateData.max_followings = max_followings === null || max_followings === '' ? null : parseInt(max_followings, 10);
+      }
+      if (follow_unfollow !== undefined) {
+        updateData.follow_unfollow = follow_unfollow;
+      }
+      
       const { data, error } = await supabase
-        .from('soundcloud')
-        .update({ styles })
+        .from('soundcloud_users')
+        .update(updateData)
         .eq('user_id', user.id)
         .select()
         .single();
@@ -100,12 +133,24 @@ export async function POST(request: Request) {
       result = data;
     } else {
       // Créer une nouvelle configuration
+      const insertData: any = {
+        user_id: user.id,
+      };
+      if (styles !== undefined) {
+        insertData.styles = styles;
+      } else {
+        insertData.styles = [];
+      }
+      if (max_followings !== undefined) {
+        insertData.max_followings = max_followings === null || max_followings === '' ? null : parseInt(max_followings, 10);
+      }
+      if (follow_unfollow !== undefined) {
+        insertData.follow_unfollow = follow_unfollow;
+      }
+      
       const { data, error } = await supabase
-        .from('soundcloud')
-        .insert({
-          user_id: user.id,
-          styles,
-        })
+        .from('soundcloud_users')
+        .insert(insertData)
         .select()
         .single();
 
@@ -132,6 +177,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
 
 
 

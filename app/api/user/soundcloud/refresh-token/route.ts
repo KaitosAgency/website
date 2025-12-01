@@ -15,21 +15,21 @@ export async function POST() {
       );
     }
 
-    // Récupérer le refresh token de l'utilisateur
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('soundcloud_refresh_token, soundcloud_user_id')
-      .eq('id', user.id)
+    // Récupérer le refresh token de l'utilisateur depuis la table soundcloud_users
+    const { data: soundcloudUserData, error: soundcloudError } = await supabase
+      .from('soundcloud_users')
+      .select('refresh_token')
+      .eq('user_id', user.id)
       .single();
 
-    if (profileError || !profile) {
+    if (soundcloudError || !soundcloudUserData) {
       return NextResponse.json(
         { error: 'Profile not found' },
         { status: 404 }
       );
     }
 
-    if (!profile.soundcloud_refresh_token) {
+    if (!soundcloudUserData.refresh_token) {
       return NextResponse.json(
         { error: 'No refresh token available. Please reconnect your SoundCloud account.' },
         { status: 400 }
@@ -40,7 +40,7 @@ export async function POST() {
     const { data: tokenData, error: tokenError } = await supabase.functions.invoke('soundcloud-auth', {
       body: {
         action: 'refresh_token',
-        refresh_token: profile.soundcloud_refresh_token,
+        refresh_token: soundcloudUserData.refresh_token,
       },
     });
 
@@ -61,19 +61,19 @@ export async function POST() {
       );
     }
 
-    // Mettre à jour le token dans la base de données
+    // Mettre à jour le token dans la table soundcloud_users
     const updateData: any = {
-      soundcloud_access_token: access_token,
+      access_token: access_token,
     };
 
     if (refresh_token) {
-      updateData.soundcloud_refresh_token = refresh_token;
+      updateData.refresh_token = refresh_token;
     }
 
     const { error: updateError } = await supabase
-      .from('user_profiles')
+      .from('soundcloud_users')
       .update(updateData)
-      .eq('id', user.id);
+      .eq('user_id', user.id);
 
     if (updateError) {
       console.error('Error updating token:', updateError);

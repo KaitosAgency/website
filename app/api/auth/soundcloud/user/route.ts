@@ -16,21 +16,21 @@ export async function GET() {
       );
     }
 
-    // Récupérer le token SoundCloud depuis la base de données
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('soundcloud_access_token, soundcloud_user_id')
-      .eq('id', user.id)
+    // Récupérer le token SoundCloud depuis la table soundcloud_users
+    const { data: soundcloudUserData, error: soundcloudError } = await supabase
+      .from('soundcloud_users')
+      .select('access_token')
+      .eq('user_id', user.id)
       .single();
 
-    if (profileError || !profile) {
+    if (soundcloudError || !soundcloudUserData) {
       return NextResponse.json(
-        { error: 'Profil utilisateur non trouvé' },
-        { status: 404 }
+        { error: 'Aucun token SoundCloud trouvé. Veuillez vous connecter à SoundCloud.' },
+        { status: 401 }
       );
     }
 
-    if (!profile.soundcloud_access_token) {
+    if (!soundcloudUserData.access_token) {
       return NextResponse.json(
         { error: 'Aucun token SoundCloud trouvé. Veuillez vous connecter à SoundCloud.' },
         { status: 401 }
@@ -38,7 +38,7 @@ export async function GET() {
     }
 
     // Utiliser le token depuis la base de données
-    const accessToken = profile.soundcloud_access_token;
+    const accessToken = soundcloudUserData.access_token;
 
     // Mettre à jour le cookie pour rester synchronisé (optionnel, pour compatibilité)
     const cookieStore = await cookies();
