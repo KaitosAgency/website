@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
@@ -10,7 +11,8 @@ import {
   LogOut, 
   User,
   HelpCircle,
-  Music
+  Music,
+  Shield
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +27,10 @@ const sidebarItems: SidebarItem[] = [
   { name: 'SoundCloud', href: '/music/dashboard/soundcloud', icon: Music },
 ]
 
+const adminItems: SidebarItem[] = [
+  { name: 'Admin SoundCloud', href: '/music/dashboard/admin/soundcloud-config', icon: Shield },
+]
+
 const bottomItems: SidebarItem[] = [
   { name: 'Support', href: '/support', icon: HelpCircle },
   { name: 'Paramètres', href: '/settings', icon: Settings },
@@ -34,6 +40,33 @@ const bottomItems: SidebarItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (!authError && user) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('type')
+            .eq('id', user.id)
+            .single()
+
+          setIsAdmin(profile?.type === 'ADMIN')
+        }
+      } catch (err) {
+        console.error('Erreur lors de la vérification admin:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAdmin()
+  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -73,6 +106,37 @@ export function Sidebar() {
             </Link>
           )
         })}
+
+        {/* Menu Admin - affiché uniquement pour les administrateurs */}
+        {!loading && isAdmin && (
+          <>
+            <div className="pt-4 mt-4 border-t border-gray-200">
+              <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Administration
+              </p>
+            </div>
+            {adminItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-gray-100 text-secondary"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-secondary"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
+          </>
+        )}
       </nav>
 
       {/* Navigation secondaire */}

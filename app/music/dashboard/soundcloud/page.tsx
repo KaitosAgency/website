@@ -19,6 +19,8 @@ interface SoundCloudConfig {
   styles: string[];
   max_followings: number | null;
   follow_unfollow: boolean;
+  auto_repost: boolean;
+  engage_with_artists: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +37,10 @@ export default function SoundCloudConfigPage() {
   const [currentFollowings, setCurrentFollowings] = useState<number | null>(null);
   const [followUnfollow, setFollowUnfollow] = useState<boolean>(false);
   const [followUnfollowLoading, setFollowUnfollowLoading] = useState(false);
+  const [autoRepost, setAutoRepost] = useState<boolean>(false);
+  const [autoRepostLoading, setAutoRepostLoading] = useState(false);
+  const [engageWithArtists, setEngageWithArtists] = useState<boolean>(false);
+  const [engageWithArtistsLoading, setEngageWithArtistsLoading] = useState(false);
   const [config, setConfig] = useState<SoundCloudConfig | null>(null);
 
   useEffect(() => {
@@ -72,6 +78,10 @@ export default function SoundCloudConfigPage() {
         setMaxFollowings(data.config.max_followings || null);
         // Remplir follow_unfollow
         setFollowUnfollow(data.config.follow_unfollow || false);
+        // Remplir auto_repost
+        setAutoRepost(data.config.auto_repost || false);
+        // Remplir engage_with_artists
+        setEngageWithArtists(data.config.engage_with_artists || false);
       }
       }
     } catch (err) {
@@ -175,6 +185,72 @@ export default function SoundCloudConfigPage() {
       setFollowUnfollow(!checked);
     } finally {
       setFollowUnfollowLoading(false);
+    }
+  };
+
+  const handleAutoRepostToggle = async (checked: boolean) => {
+    setAutoRepostLoading(true);
+    try {
+      const response = await fetch('/api/user/soundcloud/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ auto_repost: checked }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAutoRepost(data.config.auto_repost || false);
+        toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+      } else {
+        const errorData = await response.json();
+        const errorMessage = errorData.error || 'Erreur lors de la mise à jour';
+        toast.error(errorMessage);
+        // Revenir à l'état précédent en cas d'erreur
+        setAutoRepost(!checked);
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || 'Erreur lors de la mise à jour';
+      console.error('Erreur lors de la mise à jour:', err);
+      toast.error(errorMessage);
+      // Revenir à l'état précédent en cas d'erreur
+      setAutoRepost(!checked);
+    } finally {
+      setAutoRepostLoading(false);
+    }
+  };
+
+  const handleEngageWithArtistsToggle = async (checked: boolean) => {
+    setEngageWithArtistsLoading(true);
+    try {
+      const response = await fetch('/api/user/soundcloud/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ engage_with_artists: checked }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEngageWithArtists(data.config.engage_with_artists || false);
+        toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+      } else {
+        const errorData = await response.json();
+        const errorMessage = errorData.error || 'Erreur lors de la mise à jour';
+        toast.error(errorMessage);
+        // Revenir à l'état précédent en cas d'erreur
+        setEngageWithArtists(!checked);
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || 'Erreur lors de la mise à jour';
+      console.error('Erreur lors de la mise à jour:', err);
+      toast.error(errorMessage);
+      // Revenir à l'état précédent en cas d'erreur
+      setEngageWithArtists(!checked);
+    } finally {
+      setEngageWithArtistsLoading(false);
     }
   };
 
@@ -291,15 +367,53 @@ export default function SoundCloudConfigPage() {
                         Engagez avec une fan base qualifiée
                       </Label>
                     </div>
-                <p className="text-sm text-gray-600">
-                  Engagez automatiquement avec des personnes qui écoutent des styles similaires au vôtre pour développer votre audience.
-                </p>
+                    <p className="text-sm text-gray-600">
+                      Engagez automatiquement avec des personnes qui écoutent des styles similaires au vôtre pour développer votre audience.
+                    </p>
                   </div>
                   <Switch
                     id="follow-unfollow-toggle"
                     checked={followUnfollow}
                     onCheckedChange={handleFollowUnfollowToggle}
                     disabled={followUnfollowLoading}
+                  />
+                </div>
+
+                <div className="flex items-start justify-between gap-4 p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="auto-repost-toggle" className="text-base font-medium text-secondary cursor-pointer">
+                        Suivre la trend
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Découvrez et repartagez automatiquement les meilleures morceaux du moment qui correspondent à vos styles musicaux préférés.
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto-repost-toggle"
+                    checked={autoRepost}
+                    onCheckedChange={handleAutoRepostToggle}
+                    disabled={autoRepostLoading}
+                  />
+                </div>
+
+                <div className="flex items-start justify-between gap-4 p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="engage-with-artists-toggle" className="text-base font-medium text-secondary cursor-pointer">
+                        Connectez avec vos confrères
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Établissez des connexions avec les artistes les plus prometteurs qui partagent vos goûts musicaux pour créer un réseau professionnel.
+                    </p>
+                  </div>
+                  <Switch
+                    id="engage-with-artists-toggle"
+                    checked={engageWithArtists}
+                    onCheckedChange={handleEngageWithArtistsToggle}
+                    disabled={engageWithArtistsLoading}
                   />
                 </div>
               </CardContent>

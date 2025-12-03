@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { styles, max_followings, follow_unfollow } = await request.json();
+    const { styles, max_followings, follow_unfollow, auto_repost, engage_with_artists } = await request.json();
 
     // Valider styles si fourni
     if (styles !== undefined) {
@@ -94,6 +94,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Valider auto_repost si fourni
+    if (auto_repost !== undefined && typeof auto_repost !== 'boolean') {
+      return NextResponse.json(
+        { error: 'auto_repost must be a boolean' },
+        { status: 400 }
+      );
+    }
+
+    // Valider engage_with_artists si fourni
+    if (engage_with_artists !== undefined && typeof engage_with_artists !== 'boolean') {
+      return NextResponse.json(
+        { error: 'engage_with_artists must be a boolean' },
+        { status: 400 }
+      );
+    }
+
     // Vérifier si une configuration existe déjà
     const { data: existingConfig } = await supabase
       .from('soundcloud_users')
@@ -113,6 +129,12 @@ export async function POST(request: Request) {
       }
       if (follow_unfollow !== undefined) {
         updateData.follow_unfollow = follow_unfollow;
+      }
+      if (auto_repost !== undefined) {
+        updateData.auto_repost = auto_repost;
+      }
+      if (engage_with_artists !== undefined) {
+        updateData.engage_with_artists = engage_with_artists;
       }
       
       const { data, error } = await supabase
@@ -147,6 +169,12 @@ export async function POST(request: Request) {
       if (follow_unfollow !== undefined) {
         insertData.follow_unfollow = follow_unfollow;
       }
+      if (auto_repost !== undefined) {
+        insertData.auto_repost = auto_repost;
+      }
+      if (engage_with_artists !== undefined) {
+        insertData.engage_with_artists = engage_with_artists;
+      }
       
       const { data, error } = await supabase
         .from('soundcloud_users')
@@ -177,7 +205,4 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-
 

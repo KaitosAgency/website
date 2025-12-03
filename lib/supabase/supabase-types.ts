@@ -14,11 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin: {
+        Row: {
+          created_at: string | null
+          default_comments: Json | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_comments?: Json | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          default_comments?: Json | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       soundcloud_users: {
         Row: {
           access_token: string | null
+          auto_repost: boolean
           automation: boolean
+          comments: Json | null
           created_at: string | null
+          engage_with_artists: boolean
           follow_unfollow: boolean
           id: string
           max_followings: number | null
@@ -29,8 +56,11 @@ export type Database = {
         }
         Insert: {
           access_token?: string | null
+          auto_repost?: boolean
           automation?: boolean
+          comments?: Json | null
           created_at?: string | null
+          engage_with_artists?: boolean
           follow_unfollow?: boolean
           id?: string
           max_followings?: number | null
@@ -41,8 +71,11 @@ export type Database = {
         }
         Update: {
           access_token?: string | null
+          auto_repost?: boolean
           automation?: boolean
+          comments?: Json | null
           created_at?: string | null
+          engage_with_artists?: boolean
           follow_unfollow?: boolean
           id?: string
           max_followings?: number | null
@@ -96,10 +129,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_datas: {
+        Row: {
+          default_comments: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_default_comments: { Args: never; Returns: Json }
+      get_default_comments_for_user: { Args: never; Returns: Json }
+      is_admin: { Args: { user_uuid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -242,3 +282,8 @@ export type UserProfileUpdate = TablesUpdate<'user_profiles'>
 export type SoundCloudUser = Tables<'soundcloud_users'>
 export type SoundCloudUserInsert = TablesInsert<'soundcloud_users'>
 export type SoundCloudUserUpdate = TablesUpdate<'soundcloud_users'>
+
+// Type helper pour admin
+export type Admin = Tables<'admin'>
+export type AdminInsert = TablesInsert<'admin'>
+export type AdminUpdate = TablesUpdate<'admin'>
