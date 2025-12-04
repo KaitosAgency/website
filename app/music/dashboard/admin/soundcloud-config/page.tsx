@@ -12,10 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
 import { toast } from "@/components/ui/toast";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 
 export default function AdminSoundCloudConfigPage() {
   const router = useRouter();
+  const { user, isAdmin: contextIsAdmin, loading: authLoading, refreshAdminStatus } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [defaultComments, setDefaultComments] = useState<string[]>([]);
@@ -24,33 +26,35 @@ export default function AdminSoundCloudConfigPage() {
   const [savingComments, setSavingComments] = useState(false);
 
   useEffect(() => {
-    checkAuthAndLoad();
+    checkAdminAndLoad();
   }, []);
 
-  const checkAuthAndLoad = async () => {
+  // Vérifier le rôle admin à chaque accès à la page (comme demandé)
+  const checkAdminAndLoad = async () => {
     try {
-      const supabase = createClient();
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
+      // Vérifier l'authentification d'abord
+      if (!user) {
         router.push('/auth/login?redirect=/music/dashboard/admin/soundcloud-config');
         return;
       }
 
-      // Vérifier si l'utilisateur est admin
-      const { data: profile } = await supabase
+      // Toujours vérifier le rôle admin à chaque accès (sécurité)
+      const supabase = createClient();
+      const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('type')
         .eq('id', user.id)
         .single();
 
-      if (profile?.type !== 'ADMIN') {
+      if (error || profile?.type !== 'ADMIN') {
         toast.error('Accès refusé. Vous devez être administrateur.');
         router.push('/music/dashboard');
         return;
       }
 
       setIsAdmin(true);
+      // Mettre à jour le contexte aussi
+      await refreshAdminStatus();
       await loadDefaultComments();
     } catch (err) {
       console.error('Erreur:', err);

@@ -20,17 +20,6 @@ export function Header() {
   const isDarkPage = pathname === "/" || pathname === "/music"
   const { language, setLanguage, t } = useI18n()
 
-  // Ne pas afficher sur les pages d'authentification
-  if (pathname?.startsWith('/auth')) {
-    return null
-  }
-
-  const navigationItems = [
-    { name: t("navigation.solutions"), href: "#solutions", description: "Découvrez nos solutions IA" },
-    { name: t("navigation.sectors"), href: "#secteurs", description: "Secteurs d'activité" },
-    { name: t("navigation.music"), href: "/music", description: "Musique" },
-  ]
-
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
@@ -44,6 +33,17 @@ export function Header() {
   const handleLanguageChange = (lang: "fr" | "en" | "jp") => {
     setLanguage(lang)
   }
+
+  // Ne pas afficher sur les pages d'authentification (après tous les hooks)
+  if (pathname?.startsWith('/auth')) {
+    return null
+  }
+
+  const navigationItems = [
+    { name: t("navigation.solutions"), href: "#solutions", description: "Découvrez nos solutions IA" },
+    { name: t("navigation.sectors"), href: "#secteurs", description: "Secteurs d'activité" },
+    { name: t("navigation.music"), href: "/music", description: "Musique" },
+  ]
 
   return (
     <>

@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowIcon } from "@/components/ui/arrow-icon";
 import { Dashboard } from "@/components/layout/dashboard";
@@ -11,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { useSoundCloud } from "@/lib/contexts/soundcloud-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 interface SoundCloudUser {
   id: number;
@@ -32,28 +33,42 @@ interface SoundCloudUser {
 export default function MusicDashboard() {
   const router = useRouter();
   const { t } = useI18n();
-  const [supabaseUser, setSupabaseUser] = useState<any>(null);
-  const [soundcloudUser, setSoundcloudUser] = useState<SoundCloudUser | null>(null);
+  const { 
+    tokenStatus, 
+    checkingToken, 
+    verifyToken,
+    soundcloudUser,
+    loadingUser,
+    loadSoundCloudUser,
+    automation,
+    loadingAutomation,
+    updateAutomation,
+    initialLoadComplete,
+  } = useSoundCloud();
+  const { user, loading: authLoading, checkAuth } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [automation, setAutomation] = useState<boolean>(false);
   const [automationLoading, setAutomationLoading] = useState(false);
-  const [tokenStatus, setTokenStatus] = useState<{
-    valid: boolean;
-    connected: boolean;
-    message: string;
-    needsReauth?: boolean;
-    username?: string;
-  } | null>(null);
-  const [checkingToken, setCheckingToken] = useState(false);
+  const hasCheckedAuth = useRef(false);
 
+  // Vérifier l'authentification seulement une fois au montage initial
   useEffect(() => {
-    checkSupabaseAuth();
-  }, []);
+    if (!hasCheckedAuth.current) {
+      hasCheckedAuth.current = true;
+      checkAuth('/music/dashboard').then((isAuthenticated) => {
+        if (isAuthenticated) {
+          setLoading(false);
+        } else {
+          setError('Non authentifié');
+          setLoading(false);
+        }
+      });
+    }
+  }, [checkAuth]);
 
   // Recharger les données SoundCloud si on revient du callback
   useEffect(() => {
-    if (supabaseUser && !loading) {
+    if (user && !loading) {
       // Vérifier si on vient du callback SoundCloud
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('soundcloud_connected')) {
@@ -62,11 +77,12 @@ export default function MusicDashboard() {
         // Recharger les données SoundCloud
         const reloadSoundCloud = async () => {
           try {
-            const response = await fetch('/api/auth/soundcloud/user');
-            if (response.ok) {
-              const userData = await response.json();
-              setSoundcloudUser(userData);
-            }
+            // Recharger les données utilisateur après l'authentification
+            await loadSoundCloudUser(true);
+            // Vérifier le token après l'authentification SoundCloud (forcer la vérification)
+            setTimeout(() => {
+              verifyToken(true, true); // force = true, showToast = true
+            }, 500);
           } catch (err) {
             console.error('Erreur SoundCloud:', err);
             toast.error('Erreur lors du chargement des données SoundCloud');
@@ -75,54 +91,14 @@ export default function MusicDashboard() {
         reloadSoundCloud();
       }
     }
-  }, [supabaseUser, loading]);
+  }, [user, loading, verifyToken, loadSoundCloudUser]);
 
-  const checkSupabaseAuth = async () => {
-    try {
-      const supabase = createClient();
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        router.push('/auth/login?redirect=/music/dashboard');
-        return;
-      }
-
-      setSupabaseUser(user);
-      // Une fois authentifié Supabase, vérifier SoundCloud et charger l'automation
-      fetchSoundCloudData();
-      fetchAutomation();
-      // Vérifier le token après un court délai pour laisser le temps aux autres requêtes
-      setTimeout(() => {
-        verifyToken();
-      }, 500);
-    } catch (err) {
-      setError('Erreur de vérification de l\'authentification');
+  // Attendre que le préchargement soit terminé
+  useEffect(() => {
+    if (initialLoadComplete && !authLoading && user) {
       setLoading(false);
     }
-  };
-
-  const fetchSoundCloudData = async () => {
-    try {
-      const response = await fetch('/api/auth/soundcloud/user');
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Pas connecté à SoundCloud, mais c'est OK, on affiche le bouton
-          setLoading(false);
-          return;
-        }
-        throw new Error('Failed to fetch user data');
-      }
-
-      const userData = await response.json();
-      setSoundcloudUser(userData);
-    } catch (err) {
-      // Erreur mais on continue, l'utilisateur pourra se connecter
-      console.error('Erreur SoundCloud:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [initialLoadComplete, authLoading, user]);
 
   const handleSoundCloudLogin = () => {
     router.push('/api/auth/soundcloud');
@@ -135,121 +111,53 @@ export default function MusicDashboard() {
     router.push('/music');
   };
 
-  const fetchAutomation = async () => {
-    try {
-      const response = await fetch('/api/user/automation');
-      if (response.ok) {
-        const data = await response.json();
-        setAutomation(data.automation || false);
-      }
-    } catch (err) {
-      console.error('Erreur lors du chargement de l\'automation:', err);
-      toast.error('Erreur lors du chargement de l\'automation');
-    }
-  };
 
   const handleAutomationToggle = async (checked: boolean) => {
     setAutomationLoading(true);
     try {
-      const response = await fetch('/api/user/automation', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ automation: checked }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAutomation(data.automation);
-        toast.success(`Automation ${data.automation ? 'activée' : 'désactivée'}`);
-      } else {
-        const errorMessage = 'Erreur lors de la mise à jour de l\'automation';
-        console.error(errorMessage);
-        toast.error(errorMessage);
-        // Revenir à l'état précédent en cas d'erreur
-        setAutomation(!checked);
-      }
+      await updateAutomation(checked);
+      toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
     } catch (err) {
       const errorMessage = 'Erreur lors de la mise à jour de l\'automation';
       console.error(errorMessage, err);
       toast.error(errorMessage);
-      // Revenir à l'état précédent en cas d'erreur
-      setAutomation(!checked);
     } finally {
       setAutomationLoading(false);
     }
   };
 
-  const verifyToken = async () => {
-    setCheckingToken(true);
-    try {
-      // Timeout de sécurité pour éviter que la requête reste bloquée
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes max
-      
-      const response = await fetch('/api/user/soundcloud/verify-token', {
-        signal: controller.signal,
-      });
-      
-      clearTimeout(timeoutId);
-      
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        // Si la réponse n'est pas du JSON valide
-        throw new Error('Réponse invalide du serveur');
-      }
-      
-      // Toujours définir le statut, même en cas d'erreur HTTP
-      if (response.ok) {
-        setTokenStatus(data);
-        if (data.valid) {
-          toast.success('Token SoundCloud valide');
-        } else {
-          toast.error('Token SoundCloud invalide');
-        }
-      } else {
-        console.error('Erreur vérification token:', data);
-        const errorMessage = data.message || data.error || 'Erreur lors de la vérification';
-        // Si c'est une erreur 401 ou 404, on considère qu'il faut se réauthentifier
-        setTokenStatus({
-          valid: false,
-          connected: false,
-          message: errorMessage,
-          needsReauth: response.status === 401 || response.status === 404,
-        });
-        toast.error(errorMessage);
-      }
-    } catch (err: any) {
-      console.error('Erreur lors de la vérification du token:', err);
-      let errorMessage = 'Erreur de connexion lors de la vérification';
-      if (err.name === 'AbortError') {
-        errorMessage = 'Timeout - La vérification a pris trop de temps';
-        setTokenStatus({
-          valid: false,
-          connected: false,
-          message: errorMessage,
-          needsReauth: true,
-        });
-      } else {
-        errorMessage = err.message || errorMessage;
-        setTokenStatus({
-          valid: false,
-          connected: false,
-          message: errorMessage,
-          needsReauth: true,
-        });
-      }
-      toast.error(errorMessage);
-    } finally {
-      setCheckingToken(false);
-    }
-  };
-
   const handleReauth = () => {
     router.push('/api/auth/soundcloud');
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('/api/user/sign-out', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        toast.success('Déconnexion SoundCloud réussie');
+        // Nettoyer les données SoundCloud locales
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('soundcloud_token_status');
+          localStorage.removeItem('soundcloud_user_data');
+          localStorage.removeItem('soundcloud_config_data');
+          localStorage.removeItem('soundcloud_automation');
+        }
+        // Recharger les données pour mettre à jour l'interface
+        await loadSoundCloudUser(true);
+        await verifyToken(true, false);
+        // Recharger la page pour mettre à jour l'état
+        router.refresh();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Erreur lors de la déconnexion SoundCloud');
+      }
+    } catch (err) {
+      console.error('Erreur lors de la déconnexion SoundCloud:', err);
+      toast.error('Erreur lors de la déconnexion SoundCloud');
+    }
   };
 
   if (loading) {
@@ -412,29 +320,31 @@ export default function MusicDashboard() {
               </div>
               {checkingToken ? (
                 <div className="text-sm text-gray-500">Vérification...</div>
-              ) : tokenStatus ? (
+              ) : (
                 <div className="flex items-center gap-2">
-                  {tokenStatus.valid ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-medium">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      Valide
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-sm font-medium">
-                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      Invalide
-                    </span>
+                  {tokenStatus && (
+                    tokenStatus.valid ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-medium">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Valide
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-sm font-medium">
+                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Invalide
+                      </span>
+                    )
                   )}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={verifyToken}
+                    onClick={() => verifyToken(true, true)}
                     className="text-xs"
                   >
                     Vérifier
                   </Button>
                 </div>
-              ) : null}
+              )}
             </div>
             {tokenStatus && !tokenStatus.valid && tokenStatus.needsReauth && (
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -476,9 +386,9 @@ export default function MusicDashboard() {
               </div>
               <Switch
                 id="automation"
-                checked={automation}
+                checked={automation || false}
                 onCheckedChange={handleAutomationToggle}
-                disabled={automationLoading || !tokenStatus?.valid}
+                disabled={automationLoading || loadingAutomation || !tokenStatus?.valid}
               />
             </div>
             {!tokenStatus?.valid && (
@@ -486,6 +396,21 @@ export default function MusicDashboard() {
                 Le token doit être valide pour activer l'automation
               </p>
             )}
+          </div>
+
+          {/* Bouton Déconnexion */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="w-fit text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            >
+              Déconnexion
+            </Button>
+            <p className="text-xs text-gray-500 mt-2">
+              Cette action déconnecte votre compte de notre plateforme et suspendra toutes les automations.
+            </p>
           </div>
         </CardContent>
       </Card>

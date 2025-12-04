@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
 import { I18nProvider } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
+import { SoundCloudProvider } from "@/lib/contexts/soundcloud-context";
+import { AuthProvider } from "@/lib/contexts/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,9 +75,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
         <Toaster>
           <I18nProvider>
-            <DashboardWrapper>
-              {children}
-            </DashboardWrapper>
+            <AuthProvider>
+              <SoundCloudProvider>
+                <DashboardWrapper>
+                  {children}
+                </DashboardWrapper>
+              </SoundCloudProvider>
+            </AuthProvider>
           </I18nProvider>
         </Toaster>
       </body>

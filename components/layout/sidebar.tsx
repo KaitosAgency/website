@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/lib/contexts/auth-context'
 import { 
   LayoutDashboard, 
   Settings, 
@@ -12,7 +12,8 @@ import {
   User,
   HelpCircle,
   Music,
-  Shield
+  Shield,
+  AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ const sidebarItems: SidebarItem[] = [
 
 const adminItems: SidebarItem[] = [
   { name: 'Admin SoundCloud', href: '/music/dashboard/admin/soundcloud-config', icon: Shield },
+  { name: 'Erreurs', href: '/music/dashboard/admin/errors', icon: AlertCircle },
 ]
 
 const bottomItems: SidebarItem[] = [
@@ -40,33 +42,7 @@ const bottomItems: SidebarItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (!authError && user) {
-          const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('type')
-            .eq('id', user.id)
-            .single()
-
-          setIsAdmin(profile?.type === 'ADMIN')
-        }
-      } catch (err) {
-        console.error('Erreur lors de la vérification admin:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAdmin()
-  }, [])
+  const { isAdmin, loading } = useAuth()
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -108,7 +84,7 @@ export function Sidebar() {
         })}
 
         {/* Menu Admin - affiché uniquement pour les administrateurs */}
-        {!loading && isAdmin && (
+        {!loading && isAdmin === true && (
           <>
             <div className="pt-4 mt-4 border-t border-gray-200">
               <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

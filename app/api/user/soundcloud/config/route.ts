@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { styles, max_followings, follow_unfollow, auto_repost, engage_with_artists } = await request.json();
+    const { styles, max_followings, follow_unfollow, auto_repost, engage_with_artists, comments } = await request.json();
 
     // Valider styles si fourni
     if (styles !== undefined) {
@@ -110,6 +110,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Valider comments si fourni
+    if (comments !== undefined) {
+      if (!Array.isArray(comments)) {
+        return NextResponse.json(
+          { error: 'Comments must be an array' },
+          { status: 400 }
+        );
+      }
+      // Vérifier que tous les éléments sont des strings
+      if (!comments.every((c: any) => typeof c === 'string')) {
+        return NextResponse.json(
+          { error: 'All comments must be strings' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Vérifier si une configuration existe déjà
     const { data: existingConfig } = await supabase
       .from('soundcloud_users')
@@ -135,6 +152,9 @@ export async function POST(request: Request) {
       }
       if (engage_with_artists !== undefined) {
         updateData.engage_with_artists = engage_with_artists;
+      }
+      if (comments !== undefined) {
+        updateData.comments = comments;
       }
       
       const { data, error } = await supabase
@@ -174,6 +194,11 @@ export async function POST(request: Request) {
       }
       if (engage_with_artists !== undefined) {
         insertData.engage_with_artists = engage_with_artists;
+      }
+      if (comments !== undefined) {
+        insertData.comments = comments;
+      } else {
+        insertData.comments = [];
       }
       
       const { data, error } = await supabase
