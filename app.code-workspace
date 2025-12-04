@@ -1,6 +1,11 @@
 {
 	"folders": [
 		{
+			"name": ".gemini",
+			"path": "C:/Users/Stek/.gemini"
+		},
+		{
+			"name": "app",
 			"path": "."
 		}
 	],
