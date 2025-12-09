@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Vérifier l'authentification
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -29,43 +29,46 @@ export async function GET() {
       );
     }
 
-    // Récupérer toutes les erreurs
-    const { data: errors, error: errorsError } = await supabase
-      .from('errors_n8n')
+    // Récupérer toutes les entrées de logs
+    const { data: logs, error: logsError } = await supabase
+      .from('logs_n8n' as any)
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (errorsError) {
-      console.error('Error fetching errors:', errorsError);
+    if (logsError) {
+      console.error('Error fetching logs:', logsError);
       return NextResponse.json(
-        { error: 'Failed to fetch errors' },
+        { error: 'Failed to fetch logs' },
         { status: 500 }
       );
     }
 
-    // Grouper les erreurs par plateforme
-    const groupedErrors: Record<string, any[]> = {
+    // Grouper les logs par plateforme
+    const groupedLogs: Record<string, any[]> = {
       soundcloud: [],
       other: [],
     };
 
-    errors?.forEach((error) => {
-      if (error.soundcloud_error) {
-        groupedErrors.soundcloud.push({
-          ...error,
+    (logs as any[])?.forEach((log) => {
+      // Si c'est un log ou une erreur SoundCloud
+      if (log.soundcloud_error || log.soundcloud_logs) {
+        groupedLogs.soundcloud.push({
+          ...log,
           platform: 'soundcloud',
-          error_message: error.soundcloud_error,
+          error_message: log.soundcloud_error,
+          log_message: log.soundcloud_logs,
         });
       } else {
-        groupedErrors.other.push({
-          ...error,
+        groupedLogs.other.push({
+          ...log,
           platform: 'other',
           error_message: null,
+          log_message: null,
         });
       }
     });
 
-    return NextResponse.json({ errors: groupedErrors });
+    return NextResponse.json({ errors: groupedLogs });
   } catch (error: any) {
     console.error('Error in errors route:', error);
     return NextResponse.json(

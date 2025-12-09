@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { toast } from "@/components/ui/toast";
-import { AlertCircle, Music, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, Music, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 
 interface Error {
   id: number;
@@ -18,6 +18,7 @@ interface Error {
   fullname: string | null;
   platform: string;
   error_message: string | null;
+  log_message: string | null;
 }
 
 interface GroupedErrors {
@@ -25,7 +26,7 @@ interface GroupedErrors {
   other: Error[];
 }
 
-export default function AdminErrorsPage() {
+export default function AdminLogsPage() {
   const router = useRouter();
   const { user, isAdmin: contextIsAdmin, loading: authLoading, refreshAdminStatus, checkAuth } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -33,15 +34,16 @@ export default function AdminErrorsPage() {
   const [errors, setErrors] = useState<GroupedErrors>({ soundcloud: [], other: [] });
   const [error, setError] = useState<string | null>(null);
   const [expandedErrors, setExpandedErrors] = useState<Set<number>>(new Set());
+  const [filter, setFilter] = useState<'all' | 'logs' | 'errors'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const hasCheckedAdmin = useRef(false);
 
   useEffect(() => {
     if (authLoading || hasCheckedAdmin.current) return;
-    
+
     if (!user) {
-      checkAuth('/music/dashboard/admin/errors');
+      checkAuth('/music/dashboard/admin/logs');
       return;
     }
 
@@ -54,7 +56,7 @@ export default function AdminErrorsPage() {
     try {
       // Vérifier l'authentification d'abord
       if (!user) {
-        const isAuthenticated = await checkAuth('/music/dashboard/admin/errors');
+        const isAuthenticated = await checkAuth('/music/dashboard/admin/logs');
         if (!isAuthenticated) {
           return;
         }
@@ -92,7 +94,7 @@ export default function AdminErrorsPage() {
 
   const loadErrors = async () => {
     try {
-      const response = await fetch('/api/user/errors');
+      const response = await fetch('/api/user/logs');
       if (response.ok) {
         const data = await response.json();
         setErrors(data.errors || { soundcloud: [], other: [] });
@@ -130,9 +132,16 @@ export default function AdminErrorsPage() {
   };
 
   // Combiner toutes les erreurs pour la pagination
-  const allErrors = [...errors.soundcloud, ...errors.other].sort((a, b) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const allErrors = [...errors.soundcloud, ...errors.other]
+    .filter(item => {
+      if (filter === 'all') return true;
+      if (filter === 'errors') return !!item.error_message;
+      if (filter === 'logs') return !item.error_message && !!item.log_message;
+      return true;
+    })
+    .sort((a, b) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   // Calculer la pagination
   const totalPages = Math.ceil(allErrors.length / itemsPerPage);
@@ -148,7 +157,7 @@ export default function AdminErrorsPage() {
 
   if (loading || authLoading) {
     return (
-      <Dashboard title="Erreurs">
+      <Dashboard title="Logs">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-gray-600">Chargement...</div>
         </div>
@@ -158,7 +167,7 @@ export default function AdminErrorsPage() {
 
   if (!isAdmin) {
     return (
-      <Dashboard title="Erreurs">
+      <Dashboard title="Logs">
         <Card>
           <CardContent className="p-6">
             <div className="text-red-500">Accès refusé. Vous devez être administrateur.</div>
@@ -170,7 +179,7 @@ export default function AdminErrorsPage() {
 
   if (error) {
     return (
-      <Dashboard title="Erreurs">
+      <Dashboard title="Logs">
         <Card>
           <CardContent className="p-6">
             <div className="text-red-500">{error}</div>
@@ -183,27 +192,64 @@ export default function AdminErrorsPage() {
   const totalErrors = errors.soundcloud.length + errors.other.length;
 
   return (
-    <Dashboard title="Erreurs">
-      <div className="space-y-6">
+    <Dashboard
+      title="Logs"
+      filters={
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => { setFilter('all'); setCurrentPage(1); }}
+            className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${filter === 'all'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+              }`}
+          >
+            Tout
+          </button>
+          <button
+            onClick={() => { setFilter('logs'); setCurrentPage(1); }}
+            className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${filter === 'logs'
+              ? 'bg-white text-green-700 shadow-sm'
+              : 'text-gray-500 hover:text-green-600'
+              }`}
+          >
+            <CheckCircle className="h-3.5 w-3.5" />
+            Succès
+          </button>
+          <button
+            onClick={() => { setFilter('errors'); setCurrentPage(1); }}
+            className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${filter === 'errors'
+              ? 'bg-white text-red-700 shadow-sm'
+              : 'text-gray-500 hover:text-red-600'
+              }`}
+          >
+            <AlertCircle className="h-3.5 w-3.5" />
+            Erreurs
+          </button>
+        </div>
+      }
+    >
+      <div className="w-full space-y-6">
         {/* En-tête avec statistiques */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-secondary mb-2">
-                  Erreurs N8N
+                  Logs & Erreurs N8N
                 </h2>
                 <p className="text-gray-600">
-                  {totalErrors === 0 
-                    ? "Aucune erreur enregistrée" 
-                    : `${totalErrors} erreur${totalErrors > 1 ? 's' : ''} enregistrée${totalErrors > 1 ? 's' : ''}`
+                  {totalErrors === 0
+                    ? "Aucun log enregistré"
+                    : `${totalErrors} entrée${totalErrors > 1 ? 's' : ''} enregistrée${totalErrors > 1 ? 's' : ''}`
                   }
                 </p>
               </div>
               {totalErrors > 0 && (
-                <Badge variant="destructive" className="text-lg px-4 py-2">
-                  {totalErrors}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-lg px-4 py-2">
+                    {allErrors.length}
+                  </Badge>
+                </div>
               )}
             </div>
           </CardContent>
@@ -225,20 +271,29 @@ export default function AdminErrorsPage() {
               <div className="space-y-2">
                 {paginatedGroupedErrors.soundcloud.map((error) => {
                   const isExpanded = expandedErrors.has(error.id);
+                  const isError = !!error.error_message;
+                  const style = isError
+                    ? { bg: 'bg-red-50', border: 'border-red-200', hover: 'hover:bg-red-100', text: 'text-red-900', iconColor: 'text-red-600' }
+                    : { bg: 'bg-green-50', border: 'border-green-200', hover: 'hover:bg-green-100', text: 'text-green-900', iconColor: 'text-green-600' };
+
                   return (
                     <div
                       key={error.id}
-                      className="border border-red-200 bg-red-50 rounded-lg overflow-hidden"
+                      className={`border ${style.border} ${style.bg} rounded-lg overflow-hidden`}
                     >
                       <button
                         onClick={() => toggleError(error.id)}
-                        className="w-full p-4 flex items-start justify-between hover:bg-red-100 transition-colors"
+                        className={`w-full p-4 flex items-start justify-between ${style.hover} transition-colors`}
                       >
                         <div className="flex items-center gap-2 flex-1">
-                          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                          {isError ? (
+                            <AlertCircle className={`h-5 w-5 ${style.iconColor} flex-shrink-0`} />
+                          ) : (
+                            <CheckCircle className={`h-5 w-5 ${style.iconColor} flex-shrink-0`} />
+                          )}
                           <div className="text-left">
-                            <span className="font-medium text-red-900 block">
-                              Erreur #{error.id}
+                            <span className={`font-medium ${style.text} block`}>
+                              {isError ? 'Erreur' : 'Succès'} #{error.id}
                             </span>
                             {error.fullname && (
                               <span className="text-xs text-gray-600 mt-1 block">
@@ -259,11 +314,19 @@ export default function AdminErrorsPage() {
                         </div>
                       </button>
                       {isExpanded && (
-                        <div className="px-4 pb-4 pt-2 border-t border-red-200">
+                        <div className={`px-4 pb-4 pt-2 border-t ${style.border}`}>
                           {error.error_message && (
                             <div className="mt-2 p-3 bg-white rounded border border-red-100">
                               <p className="text-sm text-gray-800 whitespace-pre-wrap">
                                 {error.error_message}
+                              </p>
+                            </div>
+                          )}
+                          {error.log_message && (
+                            <div className="mt-2 p-3 bg-white rounded border border-green-100">
+                              <p className="font-semibold text-xs text-green-700 mb-1">Logs:</p>
+                              <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                {error.log_message}
                               </p>
                             </div>
                           )}
@@ -283,7 +346,7 @@ export default function AdminErrorsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5" />
-                Autres erreurs
+                Autres logs
                 <Badge variant="secondary" className="ml-2">
                   {errors.other.length}
                 </Badge>
@@ -306,7 +369,7 @@ export default function AdminErrorsPage() {
                           <AlertCircle className="h-5 w-5 text-gray-600 flex-shrink-0" />
                           <div className="text-left">
                             <span className="font-medium text-gray-900 block">
-                              Erreur #{error.id}
+                              Log #{error.id}
                             </span>
                             {error.fullname && (
                               <span className="text-xs text-gray-600 mt-1 block">
@@ -351,7 +414,7 @@ export default function AdminErrorsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Page {currentPage} sur {totalPages} ({allErrors.length} erreur{allErrors.length > 1 ? 's' : ''})
+                  Page {currentPage} sur {totalPages} ({allErrors.length} entrée{allErrors.length > 1 ? 's' : ''})
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -397,10 +460,10 @@ export default function AdminErrorsPage() {
             <CardContent className="p-12 text-center">
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Aucune erreur
+                Aucun log
               </h3>
               <p className="text-gray-500">
-                Toutes les opérations se déroulent correctement.
+                Aucune donnée à afficher.
               </p>
             </CardContent>
           </Card>

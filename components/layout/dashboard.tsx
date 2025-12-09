@@ -14,9 +14,9 @@ export function Dashboard({ title, children, headerActions, filters }: Dashboard
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      
+
       {/* Contenu principal */}
-      <main className="ml-64 min-h-screen">
+      <main className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
           <div className="px-8 py-6">
@@ -37,8 +37,18 @@ export function Dashboard({ title, children, headerActions, filters }: Dashboard
         </header>
 
         {/* Contenu */}
-        <div className="p-8">
-          {children}
+        <div className="flex-1 flex">
+          <div className="flex-1 p-8">
+            {children}
+          </div>
+
+          {/* Colonne droite hachurée */}
+          <div
+            className="hidden lg:block w-32 xl:w-64 shrink-0"
+            style={{
+              backgroundImage: 'linear-gradient(to bottom left, transparent, #f9fafb), repeating-linear-gradient(45deg, transparent, transparent 10px, #f3f4f6 10px, #f3f4f6 21px)'
+            }}
+          />
         </div>
       </main>
     </div>

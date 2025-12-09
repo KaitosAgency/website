@@ -29,10 +29,10 @@ interface SoundCloudConfig {
 
 export default function SoundCloudConfigPage() {
   const router = useRouter();
-  const { 
-    config, 
-    loadingConfig, 
-    loadConfig, 
+  const {
+    config,
+    loadingConfig,
+    loadConfig,
     updateConfig,
     soundcloudUser,
     initialLoadComplete,
@@ -109,7 +109,7 @@ export default function SoundCloudConfigPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
-    
+
     // Si l'utilisateur tape une virgule, ajouter le tag
     if (value.includes(',')) {
       const parts = value.split(',');
@@ -338,7 +338,7 @@ export default function SoundCloudConfigPage() {
 
   return (
     <Dashboard title="Configuration SoundCloud">
-      <div className="max-w-6xl">
+      <div className="w-full">
         {!isSoundCloudConnected && (
           <Card className="mb-6 border-amber-200 bg-amber-50">
             <CardContent className="pt-6">
@@ -475,7 +475,7 @@ export default function SoundCloudConfigPage() {
                       <span className="text-xs text-gray-500">Sauvegarde...</span>
                     )}
                   </div>
-                  
+
                   {comments.length === 0 ? (
                     <p className="text-gray-500 text-sm">Aucun commentaire défini.</p>
                   ) : (
@@ -508,135 +508,135 @@ export default function SoundCloudConfigPage() {
           <div className="space-y-6">
             {/* Card pour les styles musicaux */}
             <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-secondary">
-              Styles musicaux
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="styles-input" className="text-base font-medium text-secondary mb-2 block">
-                Styles musicaux <span className="text-gray-500 font-normal">({styles.length}/3)</span>
-              </Label>
-              <Input
-                id="styles-input"
-                type="text"
-                placeholder="Ex: Electronic, Hip-Hop, Rock... (Appuyez sur Entrée ou tapez une virgule pour ajouter)"
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleInputKeyDown}
-                className="w-full"
-                disabled={styles.length >= 3 || !isSoundCloudConnected}
-              />
-              {styles.length >= 3 && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Maximum 3 styles atteint
-                </p>
-              )}
-            </div>
-
-            {/* Tags des styles */}
-            {styles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {styles.map((style, index) => (
-                  <Badge
-                    key={index}
-                    variant="default"
-                    className="flex items-center gap-1.5 px-3 py-1.5"
-                  >
-                    <span>{style}</span>
-                    <button
-                      onClick={() => removeStyle(index)}
-                      className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                      aria-label={`Supprimer ${style}`}
-                      disabled={!isSoundCloudConnected}
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>💡 Astuce :</strong> Renseignez les styles musicaux qui vous définissent pour toucher un maximum de monde. 
-                Vous pouvez renseigner jusqu'à 3 styles différents. Appuyez sur Entrée ou tapez une virgule pour ajouter un style.
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button
-                variant="default"
-                onClick={handleSaveStyles}
-                disabled={savingStyles || styles.length === 0 || styles.length > 3 || !isSoundCloudConnected}
-              >
-                {savingStyles ? 'Sauvegarde...' : 'Sauvegarder'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card pour le nombre maximum de personnes à suivre */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-secondary">
-              Limite de suivi
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Affichage du nombre de followings actuel */}
-            {currentFollowings !== null && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    Nombre de personnes suivies actuellement :
-                  </span>
-                  <span className="text-lg font-semibold text-secondary">
-                    {currentFollowings.toLocaleString()}
-                  </span>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-secondary">
+                  Styles musicaux
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="styles-input" className="text-base font-medium text-secondary mb-2 block">
+                    Styles musicaux <span className="text-gray-500 font-normal">({styles.length}/3)</span>
+                  </Label>
+                  <Input
+                    id="styles-input"
+                    type="text"
+                    placeholder="Ex: Electronic, Hip-Hop, Rock... (Appuyez sur Entrée ou tapez une virgule pour ajouter)"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
+                    className="w-full"
+                    disabled={styles.length >= 3 || !isSoundCloudConnected}
+                  />
+                  {styles.length >= 3 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Maximum 3 styles atteint
+                    </p>
+                  )}
                 </div>
-              </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="max-followings-input" className="text-base font-medium text-secondary mb-2 block">
-                Nombre maximum de personnes à suivre
-              </Label>
-              <Input
-                id="max-followings-input"
-                type="number"
-                min="0"
-                placeholder="Ex: 1000"
-                value={maxFollowings === null ? '' : maxFollowings}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setMaxFollowings(value === '' ? null : parseInt(value, 10));
-                }}
-                className="w-full"
-                disabled={!isSoundCloudConnected}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Définissez le nombre maximum de personnes que vous souhaitez suivre. Votre compte sera synchronisé quotidiennement pour respecter cette limite.
-              </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-amber-800">
-                  <strong>⚠️ Sécurité :</strong> Un maximum de 100 personnes par jour sera unfollow pour éviter les blocages.
-                </p>
-              </div>
-            </div>
+                {/* Tags des styles */}
+                {styles.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {styles.map((style, index) => (
+                      <Badge
+                        key={index}
+                        variant="default"
+                        className="flex items-center gap-1.5 px-3 py-1.5"
+                      >
+                        <span>{style}</span>
+                        <button
+                          onClick={() => removeStyle(index)}
+                          className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                          aria-label={`Supprimer ${style}`}
+                          disabled={!isSoundCloudConnected}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
 
-            <div className="flex justify-end pt-2">
-              <Button
-                variant="default"
-                onClick={handleSaveMaxFollowings}
-                disabled={savingMaxFollowings || !isSoundCloudConnected}
-              >
-                {savingMaxFollowings ? 'Sauvegarde...' : 'Sauvegarder'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Astuce :</strong> Renseignez les styles musicaux qui vous définissent pour toucher un maximum de monde.
+                    Vous pouvez renseigner jusqu'à 3 styles différents. Appuyez sur Entrée ou tapez une virgule pour ajouter un style.
+                  </p>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button
+                    variant="default"
+                    onClick={handleSaveStyles}
+                    disabled={savingStyles || styles.length === 0 || styles.length > 3 || !isSoundCloudConnected}
+                  >
+                    {savingStyles ? 'Sauvegarde...' : 'Sauvegarder'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card pour le nombre maximum de personnes à suivre */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-secondary">
+                  Limite de suivi
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Affichage du nombre de followings actuel */}
+                {currentFollowings !== null && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Nombre de personnes suivies actuellement :
+                      </span>
+                      <span className="text-lg font-semibold text-secondary">
+                        {currentFollowings.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="max-followings-input" className="text-base font-medium text-secondary mb-2 block">
+                    Nombre maximum de personnes à suivre
+                  </Label>
+                  <Input
+                    id="max-followings-input"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 1000"
+                    value={maxFollowings === null ? '' : maxFollowings}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setMaxFollowings(value === '' ? null : parseInt(value, 10));
+                    }}
+                    className="w-full"
+                    disabled={!isSoundCloudConnected}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Définissez le nombre maximum de personnes que vous souhaitez suivre. Votre compte sera synchronisé quotidiennement pour respecter cette limite.
+                  </p>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
+                    <p className="text-xs text-amber-800">
+                      <strong>⚠️ Sécurité :</strong> Un maximum de 100 personnes par jour sera unfollow pour éviter les blocages.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button
+                    variant="default"
+                    onClick={handleSaveMaxFollowings}
+                    disabled={savingMaxFollowings || !isSoundCloudConnected}
+                  >
+                    {savingMaxFollowings ? 'Sauvegarde...' : 'Sauvegarder'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 

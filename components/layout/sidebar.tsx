@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/contexts/auth-context'
-import { 
-  LayoutDashboard, 
-  Settings, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Settings,
+  LogOut,
   User,
   HelpCircle,
   Music,
@@ -30,7 +30,7 @@ const sidebarItems: SidebarItem[] = [
 
 const adminItems: SidebarItem[] = [
   { name: 'Admin SoundCloud', href: '/music/dashboard/admin/soundcloud-config', icon: Shield },
-  { name: 'Erreurs', href: '/music/dashboard/admin/errors', icon: AlertCircle },
+  { name: 'Logs', href: '/music/dashboard/admin/logs', icon: AlertCircle },
 ]
 
 const bottomItems: SidebarItem[] = [
@@ -65,7 +65,7 @@ export function Sidebar() {
         {sidebarItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          
+
           return (
             <Link
               key={item.href}
@@ -94,7 +94,7 @@ export function Sidebar() {
             {adminItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
-              
+
               return (
                 <Link
                   key={item.href}
@@ -120,7 +120,7 @@ export function Sidebar() {
         {bottomItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          
+
           return (
             <Link
               key={item.href}
@@ -137,7 +137,7 @@ export function Sidebar() {
             </Link>
           )
         })}
-        
+
         {/* Bouton déconnexion */}
         <button
           onClick={handleLogout}

@@ -49,24 +49,24 @@ interface SoundCloudContextType {
   checkingToken: boolean;
   verifyToken: (force?: boolean, showToast?: boolean) => Promise<void>;
   clearTokenStatus: () => void;
-  
+
   // Données utilisateur SoundCloud
   soundcloudUser: SoundCloudUser | null;
   loadingUser: boolean;
   loadSoundCloudUser: (force?: boolean) => Promise<void>;
-  
+
   // Configuration SoundCloud
   config: SoundCloudConfig | null;
   loadingConfig: boolean;
   loadConfig: (force?: boolean) => Promise<void>;
-  updateConfig: (updates: Partial<SoundCloudConfig>) => Promise<void>;
-  
+  updateConfig: (updates: Partial<SoundCloudConfig>) => Promise<SoundCloudConfig | undefined>;
+
   // Automation
   automation: boolean | null;
   loadingAutomation: boolean;
   loadAutomation: (force?: boolean) => Promise<void>;
   updateAutomation: (value: boolean) => Promise<void>;
-  
+
   // État de préchargement initial
   initialLoadComplete: boolean;
 }
@@ -90,25 +90,25 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
   const [automation, setAutomation] = useState<boolean | null>(null);
   const [loadingAutomation, setLoadingAutomation] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  
+
   const tokenStatusRef = useRef<TokenStatus | null>(null);
   const soundcloudUserRef = useRef<SoundCloudUser | null>(null);
   const configRef = useRef<SoundCloudConfig | null>(null);
   const automationRef = useRef<boolean | null>(null);
-  
+
   // Synchroniser les refs avec les states
   useEffect(() => {
     tokenStatusRef.current = tokenStatus;
   }, [tokenStatus]);
-  
+
   useEffect(() => {
     soundcloudUserRef.current = soundcloudUser;
   }, [soundcloudUser]);
-  
+
   useEffect(() => {
     configRef.current = config;
   }, [config]);
-  
+
   useEffect(() => {
     automationRef.current = automation;
   }, [automation]);
@@ -154,13 +154,13 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       // Timeout de sécurité pour éviter que la requête reste bloquée
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes max
-      
+
       const response = await fetch('/api/user/soundcloud/verify-token', {
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       let data;
       try {
         data = await response.json();
@@ -168,7 +168,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         // Si la réponse n'est pas du JSON valide
         throw new Error('Réponse invalide du serveur');
       }
-      
+
       // Toujours définir le statut, même en cas d'erreur HTTP
       if (response.ok) {
         const status: TokenStatus = {
@@ -177,7 +177,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         };
         setTokenStatus(status);
         saveToCache(status);
-        
+
         if (showToast) {
           if (data.valid) {
             toast.success('Token SoundCloud valide');
@@ -197,7 +197,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         };
         setTokenStatus(status);
         saveToCache(status);
-        
+
         if (showToast) {
           toast.error(errorMessage);
         }
@@ -210,7 +210,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       } else {
         errorMessage = err.message || errorMessage;
       }
-      
+
       const status: TokenStatus = {
         valid: false,
         connected: false,
@@ -220,7 +220,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       };
       setTokenStatus(status);
       saveToCache(status);
-      
+
       if (showToast) {
         toast.error(errorMessage);
       }
@@ -307,7 +307,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         console.error('Erreur lors du chargement du cache utilisateur:', err);
       }
     }
-    
+
     // Si déjà chargé et pas de force, ne pas recharger
     if (!force && soundcloudUserRef.current) return;
 
@@ -369,7 +369,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         console.error('Erreur lors du chargement du cache config:', err);
       }
     }
-    
+
     // Si déjà chargé et pas de force, ne pas recharger
     if (!force && configRef.current) return;
 
@@ -454,7 +454,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         console.error('Erreur lors du chargement du cache automation:', err);
       }
     }
-    
+
     // Si déjà chargé et pas de force, ne pas recharger
     if (!force && automationRef.current !== null) return;
 
@@ -531,7 +531,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       try {
         const supabase = createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
+
         if (authError || !user) {
           setInitialLoadComplete(true);
           return;

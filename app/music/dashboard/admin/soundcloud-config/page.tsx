@@ -70,7 +70,7 @@ export default function AdminSoundCloudConfigPage() {
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) return;
 
       // Chercher une entrée admin (peut être n'importe quelle entrée admin)
@@ -196,7 +196,7 @@ export default function AdminSoundCloudConfigPage() {
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) return;
 
       // Vérifier si une entrée admin existe pour cet utilisateur
@@ -287,7 +287,7 @@ export default function AdminSoundCloudConfigPage() {
 
   return (
     <Dashboard title="Configuration SoundCloud - Admin">
-      <div className="max-w-6xl space-y-6">
+      <div className="w-full space-y-6">
         {/* Card pour gérer les commentaires par défaut */}
         <Card>
           <CardHeader>
@@ -314,7 +314,7 @@ export default function AdminSoundCloudConfigPage() {
                   }}
                   className="flex-1"
                 />
-                <Button 
+                <Button
                   onClick={handleAddComment}
                   disabled={savingComments || !newComment.trim()}
                 >
@@ -336,7 +336,7 @@ export default function AdminSoundCloudConfigPage() {
                       <span className="text-xs text-gray-500">Sauvegarde...</span>
                     )}
                   </div>
-                  
+
                   {defaultComments.length === 0 ? (
                     <p className="text-gray-500 text-sm">Aucun commentaire défini.</p>
                   ) : (
