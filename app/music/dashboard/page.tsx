@@ -1,126 +1,73 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowIcon } from "@/components/ui/arrow-icon";
 import { Dashboard } from "@/components/layout/dashboard";
 import { useI18n } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import { useSoundCloud } from "@/lib/contexts/soundcloud-context";
-import { useAuth } from "@/lib/contexts/auth-context";
-
-interface SoundCloudUser {
-  id: number;
-  username: string;
-  full_name: string;
-  avatar_url: string;
-  permalink_url: string;
-  city?: string;
-  country?: string;
-  description?: string;
-  followers_count?: number;
-  followings_count?: number;
-  public_favorites_count?: number;
-  track_count?: number;
-  playlist_count?: number;
-  plan?: string;
-}
+import { useDashboardAuth } from "@/lib/hooks/use-dashboard-auth";
+import { StatCardSkeleton, ProfileCardSkeleton } from "@/components/ui/skeleton";
+import { PlatformProfileCard, PlatformProfileCardSkeleton } from "@/components/ui/platform-profile-card";
+import { SoundCloudIcon } from "@/components/ui/icons/soundcloud-icon";
 
 export default function MusicDashboard() {
-  const router = useRouter();
   const { t } = useI18n();
-  const { 
-    tokenStatus, 
-    checkingToken, 
+  const {
+    showSkeleton,
+    error,
+    isSoundCloudConnected,
+    router,
+  } = useDashboardAuth({ redirectUrl: '/music/dashboard' });
+
+  const {
+    tokenStatus,
+    checkingToken,
     verifyToken,
     soundcloudUser,
-    loadingUser,
     loadSoundCloudUser,
     automation,
-    loadingAutomation,
     updateAutomation,
-    initialLoadComplete,
   } = useSoundCloud();
-  const { user, loading: authLoading, checkAuth } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [automationLoading, setAutomationLoading] = useState(false);
-  const hasCheckedAuth = useRef(false);
 
-  // Vérifier l'authentification seulement une fois au montage initial
-  useEffect(() => {
-    if (!hasCheckedAuth.current) {
-      hasCheckedAuth.current = true;
-      checkAuth('/music/dashboard').then((isAuthenticated) => {
-        if (isAuthenticated) {
-          setLoading(false);
-        } else {
-          setError('Non authentifié');
-          setLoading(false);
-        }
-      });
-    }
-  }, [checkAuth]);
+  const [automationLoading, setAutomationLoading] = useState(false);
 
   // Recharger les données SoundCloud si on revient du callback
   useEffect(() => {
-    if (user && !loading) {
-      // Vérifier si on vient du callback SoundCloud
+    if (isSoundCloudConnected && typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('soundcloud_connected')) {
-        // Nettoyer l'URL
         window.history.replaceState({}, '', '/music/dashboard');
-        // Recharger les données SoundCloud
         const reloadSoundCloud = async () => {
           try {
-            // Recharger les données utilisateur après l'authentification
             await loadSoundCloudUser(true);
-            // Vérifier le token après l'authentification SoundCloud (forcer la vérification)
             setTimeout(() => {
-              verifyToken(true, true); // force = true, showToast = true
+              verifyToken(true, true);
             }, 500);
           } catch (err) {
             console.error('Erreur SoundCloud:', err);
-            toast.error('Erreur lors du chargement des données SoundCloud');
+            toast.error(t('dashboard.disconnectError'));
           }
         };
         reloadSoundCloud();
       }
     }
-  }, [user, loading, verifyToken, loadSoundCloudUser]);
-
-  // Attendre que le préchargement soit terminé
-  useEffect(() => {
-    if (initialLoadComplete && !authLoading && user) {
-      setLoading(false);
-    }
-  }, [initialLoadComplete, authLoading, user]);
+  }, [isSoundCloudConnected, verifyToken, loadSoundCloudUser, t]);
 
   const handleSoundCloudLogin = () => {
     router.push('/api/auth/soundcloud');
   };
 
-  const handleLogout = () => {
-    // Supprimer les cookies
-    document.cookie = 'soundcloud_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'soundcloud_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/music');
-  };
-
-
   const handleAutomationToggle = async (checked: boolean) => {
     setAutomationLoading(true);
     try {
       await updateAutomation(checked);
-      toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+      toast.success(checked ? t('dashboard.automationEnabled') : t('dashboard.automationDisabled'));
     } catch (err) {
-      const errorMessage = 'Erreur lors de la mise à jour de l\'automation';
-      console.error(errorMessage, err);
-      toast.error(errorMessage);
+      console.error(t('dashboard.disconnectError'), err);
+      toast.error(t('dashboard.disconnectError'));
     } finally {
       setAutomationLoading(false);
     }
@@ -137,34 +84,36 @@ export default function MusicDashboard() {
       });
 
       if (response.ok) {
-        toast.success('Déconnexion SoundCloud réussie');
-        // Nettoyer les données SoundCloud locales
+        toast.success(t('dashboard.disconnectSuccess'));
         if (typeof window !== 'undefined') {
           localStorage.removeItem('soundcloud_token_status');
           localStorage.removeItem('soundcloud_user_data');
           localStorage.removeItem('soundcloud_config_data');
           localStorage.removeItem('soundcloud_automation');
         }
-        // Recharger les données pour mettre à jour l'interface
         await loadSoundCloudUser(true);
         await verifyToken(true, false);
-        // Recharger la page pour mettre à jour l'état
         router.refresh();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || 'Erreur lors de la déconnexion SoundCloud');
+        toast.error(errorData.error || t('dashboard.disconnectError'));
       }
     } catch (err) {
-      console.error('Erreur lors de la déconnexion SoundCloud:', err);
-      toast.error('Erreur lors de la déconnexion SoundCloud');
+      console.error(t('dashboard.disconnectError'), err);
+      toast.error(t('dashboard.disconnectError'));
     }
   };
 
-  if (loading) {
+  const handleSoundCloudSettings = () => {
+    router.push('/music/dashboard/soundcloud');
+  };
+
+  // État de chargement
+  if (showSkeleton) {
     return (
-      <Dashboard title="Tableau de bord">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-gray-600">Chargement...</div>
+      <Dashboard title={t('dashboard.title')}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <PlatformProfileCardSkeleton />
         </div>
       </Dashboard>
     );
@@ -172,252 +121,177 @@ export default function MusicDashboard() {
 
   if (error) {
     return (
-      <Dashboard title="Tableau de bord">
+      <Dashboard title={t('dashboard.title')}>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <div className="text-red-500 text-xl mb-4">Erreur: {error}</div>
+          <div className="text-red-500 text-xl mb-4">{t('dashboard.errorPrefix')} {error}</div>
           <Button onClick={() => router.push('/music')}>
-            Retour à la page Music
+            {t('dashboard.backToMusic')}
           </Button>
         </div>
       </Dashboard>
     );
   }
 
-  // Si pas connecté à SoundCloud, afficher le bouton de connexion
-  if (!soundcloudUser) {
-    return (
-      <Dashboard title="Tableau de bord">
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="p-12 text-center">
-            <h2 className="text-2xl font-semibold text-secondary mb-4">
-              Connectez votre compte SoundCloud
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Pour accéder à votre dashboard SoundCloud, vous devez d'abord connecter votre compte SoundCloud.
-            </p>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={handleSoundCloudLogin}
-              className="flex items-center gap-2 mx-auto"
-            >
-              {t("music.cta")}
-              <ArrowIcon size={18} />
-            </Button>
-          </CardContent>
-        </Card>
-      </Dashboard>
-    );
-  }
+  // Construire la localisation
+  const location = soundcloudUser ? [soundcloudUser.city, soundcloudUser.country]
+    .filter(Boolean)
+    .join(', ') : undefined;
+
+  // Construire les stats
+  const soundcloudStats = soundcloudUser ? [
+    { label: t('dashboard.followers'), value: soundcloudUser.followers_count || 0 },
+    { label: t('dashboard.following'), value: soundcloudUser.followings_count || 0 },
+    { label: t('dashboard.tracks'), value: soundcloudUser.track_count || 0 },
+    { label: t('dashboard.playlists'), value: soundcloudUser.playlist_count || 0 },
+  ] : [];
 
   return (
-    <Dashboard title="Tableau de bord">
-      {/* Cartes de statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {soundcloudUser.followers_count !== undefined && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-secondary mb-1">
-                {soundcloudUser.followers_count.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Abonnés</div>
-            </CardContent>
-          </Card>
-        )}
-        {soundcloudUser.followings_count !== undefined && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-secondary mb-1">
-                {soundcloudUser.followings_count.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Abonnements</div>
-            </CardContent>
-          </Card>
-        )}
-        {soundcloudUser.track_count !== undefined && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-secondary mb-1">
-                {soundcloudUser.track_count.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Tracks</div>
-            </CardContent>
-          </Card>
-        )}
-        {soundcloudUser.playlist_count !== undefined && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-secondary mb-1">
-                {soundcloudUser.playlist_count.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Playlists</div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+    <Dashboard title={t('dashboard.title')}>
+      {/* Message d'introduction quand pas de plateforme connectée */}
+      {!isSoundCloudConnected && (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold text-secondary mb-4">
+            {t('dashboard.welcomeTitle')}
+          </h2>
+          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            {t('dashboard.welcomeDesc')}
+          </p>
+        </div>
+      )}
 
-      {/* Carte profil utilisateur */}
-      <Card className="mb-8">
-        <CardContent className="p-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            {soundcloudUser.avatar_url && (
-              <img
-                src={soundcloudUser.avatar_url}
-                alt={soundcloudUser.username}
-                className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
-              />
-            )}
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold text-secondary mb-2">
-                {soundcloudUser.full_name || soundcloudUser.username}
-              </h2>
-              <p className="text-gray-600 mb-4">@{soundcloudUser.username}</p>
-              {soundcloudUser.description && (
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {soundcloudUser.description}
-                </p>
-              )}
-              {soundcloudUser.permalink_url && (
-                <a
-                  href={soundcloudUser.permalink_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80 inline-flex items-center gap-2 text-sm font-medium"
-                >
-                  Voir le profil SoundCloud
-                  <ArrowIcon size={16} />
-                </a>
-              )}
-              {(soundcloudUser.city || soundcloudUser.country) && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
-                    {soundcloudUser.city && <span>{soundcloudUser.city}</span>}
-                    {soundcloudUser.city && soundcloudUser.country && <span>, </span>}
-                    {soundcloudUser.country && <span>{soundcloudUser.country}</span>}
-                  </p>
-                </div>
-              )}
-              {soundcloudUser.plan && (
-                <div className="mt-4">
-                  <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                    Plan: {soundcloudUser.plan}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Statut du token SoundCloud */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="space-y-0.5">
-                <Label className="text-base font-medium text-secondary">
-                  Statut de la connexion SoundCloud
-                </Label>
-                <p className="text-sm text-gray-600">
-                  Vérification de la validité du token
-                </p>
-              </div>
-              {checkingToken ? (
-                <div className="text-sm text-gray-500">Vérification...</div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  {tokenStatus && (
-                    tokenStatus.valid ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-medium">
-                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Valide
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-sm font-medium">
-                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                        Invalide
-                      </span>
-                    )
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => verifyToken(true, true)}
-                    className="text-xs"
-                  >
-                    Vérifier
-                  </Button>
-                </div>
-              )}
-            </div>
-            {tokenStatus && !tokenStatus.valid && tokenStatus.needsReauth && (
-              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 mb-2">
-                  {tokenStatus.message}
-                </p>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleReauth}
-                  className="bg-primary text-white hover:bg-primary/90"
-                >
-                  Se réauthentifier avec SoundCloud
-                </Button>
-              </div>
-            )}
-            {tokenStatus && tokenStatus.valid && (
-              <div className="mt-2 text-sm text-gray-600">
-                <p>Token valide - Connexion active</p>
-                {tokenStatus.username && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Compte: @{tokenStatus.username}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Toggle Automation */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="automation" className="text-base font-medium text-secondary">
-                  Automation
-                </Label>
-                <p className="text-sm text-gray-600">
-                  Activez l'automatisation pour votre compte SoundCloud
-                </p>
-              </div>
-              <Switch
-                id="automation"
-                checked={automation || false}
-                onCheckedChange={handleAutomationToggle}
-                disabled={automationLoading || loadingAutomation || !tokenStatus?.valid}
-              />
-            </div>
-            {!tokenStatus?.valid && (
-              <p className="text-xs text-gray-500 mt-2">
-                Le token doit être valide pour activer l'automation
-              </p>
-            )}
-          </div>
-
-          {/* Bouton Déconnexion */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className="w-fit text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+      {/* Grille des plateformes connectées */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* SoundCloud Card */}
+        {isSoundCloudConnected && soundcloudUser ? (
+          <PlatformProfileCard
+            platformName="SoundCloud"
+            platformIcon={<SoundCloudIcon size={20} />}
+            platformColor="#ff5500"
+            username={soundcloudUser.username}
+            displayName={soundcloudUser.full_name || soundcloudUser.username}
+            avatarUrl={soundcloudUser.avatar_url}
+            profileUrl={soundcloudUser.permalink_url}
+            location={location}
+            description={soundcloudUser.description}
+            plan={soundcloudUser.plan}
+            stats={soundcloudStats}
+            isConnected={isSoundCloudConnected}
+            isTokenValid={tokenStatus?.valid}
+            isCheckingToken={checkingToken}
+            tokenMessage={tokenStatus?.message}
+            needsReauth={tokenStatus?.needsReauth}
+            onVerifyToken={() => verifyToken(true, true)}
+            onReauth={handleReauth}
+            automationEnabled={automation || false}
+            automationLoading={automationLoading}
+            automationDisabled={!tokenStatus?.valid}
+            onAutomationChange={handleAutomationToggle}
+            automationLabel={t('dashboard.automation')}
+            automationDescription={t('dashboard.automationDesc')}
+            automationDisabledMessage={t('dashboard.tokenRequired')}
+            onDisconnect={handleSignOut}
+            onSettings={handleSoundCloudSettings}
+            labels={{
+              viewProfile: t('dashboard.viewProfile'),
+              connectionStatus: t('dashboard.connectionStatus'),
+              tokenValidation: t('dashboard.tokenValidation'),
+              valid: t('dashboard.valid'),
+              invalid: t('dashboard.invalid'),
+              verify: t('dashboard.verify'),
+              checking: t('dashboard.checking'),
+              reauthenticate: t('dashboard.reauthenticate'),
+              disconnect: t('dashboard.disconnect'),
+              disconnectDesc: t('dashboard.disconnectDesc'),
+              plan: t('dashboard.plan'),
+              tokenValid: t('dashboard.tokenValid'),
+              account: t('dashboard.account'),
+              tokenRequired: t('dashboard.tokenRequired'),
+            }}
+          />
+        ) : (
+          /* Card pour connecter SoundCloud */
+          <Card className="overflow-hidden w-full max-w-md">
+            <div
+              className="relative h-24"
+              style={{
+                background: 'linear-gradient(135deg, #ff5500 0%, #1a1a2e 100%)',
+              }}
             >
-              Déconnexion
-            </Button>
-            <p className="text-xs text-gray-500 mt-2">
-              Cette action déconnecte votre compte de notre plateforme et suspendra toutes les automations.
-            </p>
+              <div className="absolute top-3 left-3 flex items-center gap-2">
+                <SoundCloudIcon size={20} className="text-white/90" />
+                <span className="text-white/90 text-sm font-medium">SoundCloud</span>
+              </div>
+            </div>
+            <CardContent className="p-6 text-center">
+              <h3 className="text-lg font-semibold text-secondary mb-2">
+                {t('dashboard.connectSoundcloud')}
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                {t('dashboard.connectSoundcloudDesc')}
+              </p>
+              <Button
+                variant="default"
+                onClick={handleSoundCloudLogin}
+                className="flex items-center gap-2 mx-auto"
+              >
+                {t("music.cta")}
+                <ArrowIcon size={16} />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Placeholder pour futures plateformes - Spotify */}
+        <Card className="overflow-hidden w-full max-w-md opacity-60">
+          <div
+            className="relative h-24"
+            style={{
+              background: 'linear-gradient(135deg, #1DB954 0%, #1a1a2e 100%)',
+            }}
+          >
+            <div className="absolute top-3 left-3 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">Spotify</span>
+            </div>
+            <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+              {t('common.comingSoon')}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-sm text-gray-500">
+              {t('dashboard.platformComingSoon')}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Placeholder pour futures plateformes - YouTube */}
+        <Card className="overflow-hidden w-full max-w-md opacity-60">
+          <div
+            className="relative h-24"
+            style={{
+              background: 'linear-gradient(135deg, #FF0000 0%, #1a1a2e 100%)',
+            }}
+          >
+            <div className="absolute top-3 left-3 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">YouTube</span>
+            </div>
+            <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+              {t('common.comingSoon')}
+            </div>
+          </div>
+          <CardContent className="p-6 text-center">
+            <p className="text-sm text-gray-500">
+              {t('dashboard.platformComingSoon')}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </Dashboard>
   );
 }
-
-
-
 

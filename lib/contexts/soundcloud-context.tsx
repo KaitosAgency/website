@@ -77,10 +77,130 @@ const CACHE_KEY = 'soundcloud_token_status';
 const CACHE_USER_KEY = 'soundcloud_user_data';
 const CACHE_CONFIG_KEY = 'soundcloud_config_data';
 const CACHE_AUTOMATION_KEY = 'soundcloud_automation';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const CACHE_DATA_DURATION = 10 * 60 * 1000; // 10 minutes pour les données
+const SESSION_LOADED_KEY = 'soundcloud_session_loaded'; // Track if data was loaded in this session
+const HARD_REFRESH_HANDLED_KEY = 'soundcloud_hard_refresh_handled'; // Track if we already handled the hard refresh
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes pour le token
+const CACHE_DATA_DURATION = 60 * 60 * 1000; // 1 heure pour les données
+
+// Debug mode - mettre à true pour voir les logs
+const DEBUG = false;
+
+function debugLog(...args: any[]) {
+  if (DEBUG) {
+    console.log('[SoundCloud Context]', ...args);
+  }
+}
+
+// Vérifie si c'est un rechargement dur (hard refresh)
+// Cette fonction ne retourne true qu'UNE SEULE FOIS par hard refresh réel
+function isHardRefresh(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Si on a déjà géré le hard refresh dans cette session, retourner false
+  const alreadyHandled = sessionStorage.getItem(HARD_REFRESH_HANDLED_KEY) === 'true';
+  if (alreadyHandled) {
+    debugLog('Hard refresh already handled in this session');
+    return false;
+  }
+
+  // Vérifier si c'est vraiment un reload
+  const performanceEntries = performance.getEntriesByType('navigation');
+  if (performanceEntries.length > 0) {
+    const navEntry = performanceEntries[0] as PerformanceNavigationTiming;
+    const isReload = navEntry.type === 'reload';
+
+    // Marquer comme géré pour ne pas re-détecter lors des navigations SPA
+    sessionStorage.setItem(HARD_REFRESH_HANDLED_KEY, 'true');
+
+    debugLog('Navigation type:', navEntry.type, '- isReload:', isReload);
+    return isReload;
+  }
+
+  // Si pas d'entrée de navigation, marquer quand même comme géré
+  sessionStorage.setItem(HARD_REFRESH_HANDLED_KEY, 'true');
+  return false;
+}
+
+// Charge les données cachées de façon synchrone
+function getInitialCachedUser(): SoundCloudUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(CACHE_USER_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      const now = Date.now();
+      if (parsed.lastLoaded && (now - parsed.lastLoaded) < CACHE_DATA_DURATION) {
+        debugLog('Loaded user from cache:', parsed.data?.username);
+        return parsed.data;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading cached user:', err);
+  }
+  return null;
+}
+
+function getInitialCachedTokenStatus(): TokenStatus | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      const now = Date.now();
+      if (parsed.lastVerified && (now - parsed.lastVerified) < CACHE_DURATION) {
+        debugLog('Loaded token status from cache:', parsed.valid ? 'valid' : 'invalid');
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading cached token status:', err);
+  }
+  return null;
+}
+
+function getInitialCachedConfig(): SoundCloudConfig | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(CACHE_CONFIG_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      const now = Date.now();
+      if (parsed.lastLoaded && (now - parsed.lastLoaded) < CACHE_DATA_DURATION) {
+        debugLog('Loaded config from cache');
+        return parsed.data;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading cached config:', err);
+  }
+  return null;
+}
+
+function getInitialCachedAutomation(): boolean | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(CACHE_AUTOMATION_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      const now = Date.now();
+      if (parsed.lastLoaded && (now - parsed.lastLoaded) < CACHE_DATA_DURATION) {
+        debugLog('Loaded automation from cache:', parsed.data);
+        return parsed.data;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading cached automation:', err);
+  }
+  return null;
+}
+
+function isSessionAlreadyLoaded(): boolean {
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem(SESSION_LOADED_KEY) === 'true';
+}
 
 export function SoundCloudProvider({ children }: { children: ReactNode }) {
+  // États initialisés à null pour éviter le mismatch d'hydratation SSR
   const [tokenStatus, setTokenStatus] = useState<TokenStatus | null>(null);
   const [checkingToken, setCheckingToken] = useState(false);
   const [soundcloudUser, setSoundcloudUser] = useState<SoundCloudUser | null>(null);
@@ -90,6 +210,39 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
   const [automation, setAutomation] = useState<boolean | null>(null);
   const [loadingAutomation, setLoadingAutomation] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [sessionDataLoaded, setSessionDataLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Charger le cache immédiatement après le montage (côté client uniquement)
+  // useLayoutEffect pour charger AVANT le paint et éviter le flash
+  React.useLayoutEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cachedUser = getInitialCachedUser();
+      const cachedToken = getInitialCachedTokenStatus();
+      const cachedConfig = getInitialCachedConfig();
+      const cachedAutomation = getInitialCachedAutomation();
+      const sessionLoaded = isSessionAlreadyLoaded();
+
+      if (cachedUser) {
+        setSoundcloudUser(cachedUser);
+        debugLog('Loaded user from cache after mount:', cachedUser.username);
+      }
+      if (cachedToken) {
+        setTokenStatus(cachedToken);
+      }
+      if (cachedConfig) {
+        setConfig(cachedConfig);
+      }
+      if (cachedAutomation !== null) {
+        setAutomation(cachedAutomation);
+      }
+      if (cachedUser) {
+        setInitialLoadComplete(true);
+      }
+      setSessionDataLoaded(sessionLoaded);
+      setMounted(true);
+    }
+  }, []);
 
   const tokenStatusRef = useRef<TokenStatus | null>(null);
   const soundcloudUserRef = useRef<SoundCloudUser | null>(null);
@@ -277,12 +430,15 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
     setSoundcloudUser(null);
     setConfig(null);
     setAutomation(null);
+    setSessionDataLoaded(false);
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem(CACHE_KEY);
         localStorage.removeItem(CACHE_USER_KEY);
         localStorage.removeItem(CACHE_CONFIG_KEY);
         localStorage.removeItem(CACHE_AUTOMATION_KEY);
+        sessionStorage.removeItem(SESSION_LOADED_KEY);
+        sessionStorage.removeItem(HARD_REFRESH_HANDLED_KEY);
       } catch (err) {
         console.error('Erreur lors du nettoyage du cache:', err);
       }
@@ -518,7 +674,7 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Préchargement initial des données
+  // Préchargement initial des données - exécuté une seule fois au montage
   useEffect(() => {
     // Vérifier que nous sommes côté client
     if (typeof window === 'undefined') {
@@ -527,31 +683,67 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
     }
 
     const preloadData = async () => {
+      // Vérifier si c'est un hard refresh
+      const hardRefresh = isHardRefresh();
+      // Lire les valeurs cachées directement (pas via les states qui peuvent être stale)
+      const cachedUser = getInitialCachedUser();
+      const hasCachedUser = cachedUser !== null;
+
+      debugLog('Preload check:', {
+        hardRefresh,
+        hasCachedUser,
+      });
+
+      // Si les données sont déjà chargées depuis le cache et ce n'est pas un hard refresh, skip
+      if (!hardRefresh && hasCachedUser) {
+        debugLog('Skipping preload - data already loaded from cache');
+        sessionStorage.setItem(SESSION_LOADED_KEY, 'true');
+        setSessionDataLoaded(true);
+        setInitialLoadComplete(true);
+        return;
+      }
+
+      // Si c'est un hard refresh, on force le rechargement
+      if (hardRefresh) {
+        debugLog('Hard refresh detected - forcing reload');
+      }
+
       // Vérifier l'authentification Supabase d'abord
       try {
         const supabase = createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
+          debugLog('No authenticated user, skipping SoundCloud load');
           setInitialLoadComplete(true);
           return;
         }
 
+        // Si hard refresh, forcer le rechargement
+        const forceRefresh = hardRefresh;
+        debugLog('Loading SoundCloud data...', { forceRefresh });
+
         // Charger toutes les données en parallèle
         await Promise.all([
-          loadSoundCloudUser(false).catch((err) => {
+          loadSoundCloudUser(forceRefresh).catch((err) => {
             // Ne pas logger les erreurs 401 car c'est normal si l'utilisateur n'est pas connecté à SoundCloud
             if (err?.status !== 401 && err?.response?.status !== 401) {
               console.error('Erreur lors du chargement de l\'utilisateur SoundCloud:', err);
             }
           }),
-          loadConfig(false).catch((err) => {
+          loadConfig(forceRefresh).catch((err) => {
             console.error('Erreur lors du chargement de la config:', err);
           }),
-          loadAutomation(false).catch((err) => {
+          loadAutomation(forceRefresh).catch((err) => {
             console.error('Erreur lors du chargement de l\'automation:', err);
           }),
         ]);
+
+        debugLog('SoundCloud data loaded successfully');
+
+        // Marquer la session comme ayant chargé les données
+        sessionStorage.setItem(SESSION_LOADED_KEY, 'true');
+        setSessionDataLoaded(true);
       } catch (err) {
         console.error('Erreur lors du préchargement:', err);
       } finally {
@@ -560,7 +752,23 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
     };
 
     preloadData();
-  }, [loadSoundCloudUser, loadConfig, loadAutomation]); // Dépendances nécessaires
+    // Ce useEffect ne doit s'exécuter qu'une seule fois au montage
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Vérifier automatiquement le token quand l'utilisateur SoundCloud est chargé
+  // Mais seulement si le token n'a pas encore été vérifié dans cette session
+  useEffect(() => {
+    if (soundcloudUser && initialLoadComplete) {
+      // Si on a un utilisateur SoundCloud mais pas de tokenStatus valide, vérifier le token
+      // Mais seulement si ce n'est pas déjà en cours de vérification
+      if ((!tokenStatus || !tokenStatus.valid) && !checkingToken) {
+        verifyToken(false, false).catch((err) => {
+          console.error('Erreur lors de la vérification automatique du token:', err);
+        });
+      }
+    }
+  }, [soundcloudUser, initialLoadComplete, tokenStatus, checkingToken, verifyToken]);
 
   return (
     <SoundCloudContext.Provider

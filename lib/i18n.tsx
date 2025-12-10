@@ -23,7 +23,7 @@ const translations: Record<Language, Translations> = {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("fr")
+  const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
     // Récupérer la langue depuis localStorage ou utiliser 'fr' par défaut
@@ -43,7 +43,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const t = (key: string): string => {
     const keys = key.split(".")
     let value: any = translations[language]
-    
+
     for (const k of keys) {
       if (value && typeof value === "object" && k in value) {
         value = value[k]
@@ -60,7 +60,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         break
       }
     }
-    
+
     return typeof value === "string" ? value : key
   }
 

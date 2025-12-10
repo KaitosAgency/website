@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState, KeyboardEvent, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, KeyboardEvent } from "react";
 import { Dashboard } from "@/components/layout/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { useSoundCloud } from "@/lib/contexts/soundcloud-context";
-import { useAuth } from "@/lib/contexts/auth-context";
+import { useDashboardAuth } from "@/lib/hooks/use-dashboard-auth";
+import { useI18n } from "@/lib/i18n";
 
 interface SoundCloudConfig {
   id: string;
@@ -28,21 +28,25 @@ interface SoundCloudConfig {
 }
 
 export default function SoundCloudConfigPage() {
-  const router = useRouter();
+  const { t } = useI18n();
+  const {
+    showLoading,
+    error,
+    isSoundCloudConnected,
+    router,
+  } = useDashboardAuth({ redirectUrl: '/music/dashboard/soundcloud' });
+
   const {
     config,
     loadingConfig,
     loadConfig,
     updateConfig,
     soundcloudUser,
-    initialLoadComplete,
   } = useSoundCloud();
-  const { user, loading: authLoading, checkAuth } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const hasCheckedAuth = useRef(false);
+
   const [savingStyles, setSavingStyles] = useState(false);
   const [savingMaxFollowings, setSavingMaxFollowings] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [styles, setStyles] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [maxFollowings, setMaxFollowings] = useState<number | null>(null);
@@ -55,19 +59,6 @@ export default function SoundCloudConfigPage() {
   const [comments, setComments] = useState<string[]>([]);
   const [newComment, setNewComment] = useState('');
   const [savingComments, setSavingComments] = useState(false);
-
-  // Vérifier l'authentification seulement une fois au montage initial
-  useEffect(() => {
-    if (!hasCheckedAuth.current) {
-      hasCheckedAuth.current = true;
-      checkAuth('/music/dashboard/soundcloud').then((isAuthenticated) => {
-        if (!isAuthenticated) {
-          setError('Non authentifié');
-          setLoading(false);
-        }
-      });
-    }
-  }, [checkAuth]);
 
   // Synchroniser les données du contexte avec les états locaux
   useEffect(() => {
@@ -87,17 +78,6 @@ export default function SoundCloudConfigPage() {
 
   // Récupérer le nombre de followings depuis l'utilisateur SoundCloud
   const currentFollowings = soundcloudUser?.followings_count || null;
-
-  // Vérifier si l'utilisateur est connecté à SoundCloud
-  // Si soundcloudUser existe, cela signifie qu'il y a une connexion SoundCloud active
-  const isSoundCloudConnected = soundcloudUser !== null && soundcloudUser !== undefined;
-
-  // Attendre que le préchargement soit terminé
-  useEffect(() => {
-    if (initialLoadComplete && !authLoading && user) {
-      setLoading(false);
-    }
-  }, [initialLoadComplete, authLoading, user]);
 
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -133,12 +113,12 @@ export default function SoundCloudConfigPage() {
   const addStyleFromValue = (value: string) => {
     if (value && !styles.includes(value) && styles.length < 3) {
       setStyles([...styles, value]);
-      setError(null);
-      toast.success(`Style "${value}" ajouté`);
+      setConfigError(null);
+      toast.success(`${t('soundcloudPage.styleAdded')}: "${value}"`);
     } else if (styles.includes(value)) {
-      toast.error(`Le style "${value}" est déjà ajouté`);
+      toast.error(t('soundcloudPage.styleExists'));
     } else if (styles.length >= 3) {
-      toast.error('Maximum 3 styles atteint');
+      toast.error(t('soundcloudPage.maxStylesReached'));
     }
   };
 
@@ -148,7 +128,7 @@ export default function SoundCloudConfigPage() {
 
   const handleFollowUnfollowToggle = async (checked: boolean) => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour activer cette fonctionnalité');
+      toast.error(t('soundcloudPage.mustBeConnected'));
       return;
     }
     setFollowUnfollowLoading(true);
@@ -156,11 +136,11 @@ export default function SoundCloudConfigPage() {
       const updatedConfig = await updateConfig({ follow_unfollow: checked });
       if (updatedConfig) {
         setFollowUnfollow(updatedConfig.follow_unfollow || false);
-        toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+        toast.success(checked ? t('dashboard.automationEnabled') : t('dashboard.automationDisabled'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la mise à jour';
-      console.error('Erreur lors de la mise à jour:', err);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
       toast.error(errorMessage);
       // Revenir à l'état précédent en cas d'erreur
       setFollowUnfollow(!checked);
@@ -171,7 +151,7 @@ export default function SoundCloudConfigPage() {
 
   const handleAutoRepostToggle = async (checked: boolean) => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour activer cette fonctionnalité');
+      toast.error(t('soundcloudPage.mustBeConnected'));
       return;
     }
     setAutoRepostLoading(true);
@@ -179,11 +159,11 @@ export default function SoundCloudConfigPage() {
       const updatedConfig = await updateConfig({ auto_repost: checked });
       if (updatedConfig) {
         setAutoRepost(updatedConfig.auto_repost || false);
-        toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+        toast.success(checked ? t('dashboard.automationEnabled') : t('dashboard.automationDisabled'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la mise à jour';
-      console.error('Erreur lors de la mise à jour:', err);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
       toast.error(errorMessage);
       // Revenir à l'état précédent en cas d'erreur
       setAutoRepost(!checked);
@@ -194,7 +174,7 @@ export default function SoundCloudConfigPage() {
 
   const handleEngageWithArtistsToggle = async (checked: boolean) => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour activer cette fonctionnalité');
+      toast.error(t('soundcloudPage.mustBeConnected'));
       return;
     }
     setEngageWithArtistsLoading(true);
@@ -202,11 +182,11 @@ export default function SoundCloudConfigPage() {
       const updatedConfig = await updateConfig({ engage_with_artists: checked });
       if (updatedConfig) {
         setEngageWithArtists(updatedConfig.engage_with_artists || false);
-        toast.success(`Automation ${checked ? 'activée' : 'désactivée'}`);
+        toast.success(checked ? t('dashboard.automationEnabled') : t('dashboard.automationDisabled'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la mise à jour';
-      console.error('Erreur lors de la mise à jour:', err);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
       toast.error(errorMessage);
       // Revenir à l'état précédent en cas d'erreur
       setEngageWithArtists(!checked);
@@ -217,35 +197,35 @@ export default function SoundCloudConfigPage() {
 
   const handleSaveStyles = async () => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour sauvegarder vos styles');
+      toast.error(t('soundcloudPage.mustBeConnectedStyles'));
       return;
     }
     if (styles.length === 0) {
-      setError('Veuillez renseigner au moins un style');
-      toast.error('Veuillez renseigner au moins un style');
+      setConfigError(t('soundcloudPage.atLeastOneStyle'));
+      toast.error(t('soundcloudPage.atLeastOneStyle'));
       return;
     }
 
     if (styles.length > 3) {
-      setError('Vous ne pouvez pas renseigner plus de 3 styles');
-      toast.error('Vous ne pouvez pas renseigner plus de 3 styles');
+      setConfigError(t('soundcloudPage.maxThreeStyles'));
+      toast.error(t('soundcloudPage.maxThreeStyles'));
       return;
     }
 
     setSavingStyles(true);
-    setError(null);
+    setConfigError(null);
 
     try {
       const updatedConfig = await updateConfig({ styles });
       if (updatedConfig) {
         setStyles(updatedConfig.styles || []);
         setInputValue('');
-        toast.success('Styles musicaux sauvegardés avec succès !');
+        toast.success(t('soundcloudPage.stylesSaved'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la sauvegarde';
-      console.error('Erreur lors de la sauvegarde:', err);
-      setError(errorMessage);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
+      setConfigError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setSavingStyles(false);
@@ -254,16 +234,16 @@ export default function SoundCloudConfigPage() {
 
   const handleAddComment = async () => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour ajouter un commentaire');
+      toast.error(t('soundcloudPage.mustBeConnectedComments'));
       return;
     }
     if (!newComment.trim()) {
-      toast.error('Veuillez entrer un commentaire');
+      toast.error(t('soundcloudPage.enterCommentError'));
       return;
     }
 
     if (comments.includes(newComment.trim())) {
-      toast.error('Ce commentaire existe déjà');
+      toast.error(t('soundcloudPage.commentExists'));
       return;
     }
 
@@ -274,7 +254,7 @@ export default function SoundCloudConfigPage() {
 
   const handleRemoveComment = async (comment: string) => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour supprimer un commentaire');
+      toast.error(t('soundcloudPage.mustBeConnectedComments'));
       return;
     }
     const updatedComments = comments.filter(c => c !== comment);
@@ -283,7 +263,7 @@ export default function SoundCloudConfigPage() {
 
   const saveComments = async (commentsToSave: string[]) => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour sauvegarder vos commentaires');
+      toast.error(t('soundcloudPage.mustBeConnectedComments'));
       return;
     }
     setSavingComments(true);
@@ -291,11 +271,11 @@ export default function SoundCloudConfigPage() {
       const updatedConfig = await updateConfig({ comments: commentsToSave });
       if (updatedConfig) {
         setComments(updatedConfig.comments || []);
-        toast.success('Commentaires sauvegardés avec succès');
+        toast.success(t('soundcloudPage.commentsSaved'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la sauvegarde';
-      console.error('Erreur lors de la sauvegarde:', err);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
       toast.error(errorMessage);
     } finally {
       setSavingComments(false);
@@ -304,40 +284,40 @@ export default function SoundCloudConfigPage() {
 
   const handleSaveMaxFollowings = async () => {
     if (!isSoundCloudConnected) {
-      toast.error('Vous devez être connecté à SoundCloud pour sauvegarder la limite de suivi');
+      toast.error(t('soundcloudPage.mustBeConnectedFollowLimit'));
       return;
     }
     setSavingMaxFollowings(true);
-    setError(null);
+    setConfigError(null);
 
     try {
       const updatedConfig = await updateConfig({ max_followings: maxFollowings });
       if (updatedConfig) {
         setMaxFollowings(updatedConfig.max_followings || null);
-        toast.success('Limite de suivi sauvegardée avec succès !');
+        toast.success(t('soundcloudPage.followLimitSaved'));
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la sauvegarde';
-      console.error('Erreur lors de la sauvegarde:', err);
-      setError(errorMessage);
+      const errorMessage = err.message || t('common.error');
+      console.error(t('common.error'), err);
+      setConfigError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setSavingMaxFollowings(false);
     }
   };
 
-  if (loading) {
+  if (showLoading) {
     return (
-      <Dashboard title="Configuration SoundCloud">
+      <Dashboard title={t('soundcloudPage.title')}>
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-gray-600">Chargement...</div>
+          <div className="text-gray-600">{t('soundcloudPage.loading')}</div>
         </div>
       </Dashboard>
     );
   }
 
   return (
-    <Dashboard title="Configuration SoundCloud">
+    <Dashboard title={t('soundcloudPage.title')}>
       <div className="w-full">
         {!isSoundCloudConnected && (
           <Card className="mb-6 border-amber-200 bg-amber-50">
@@ -345,17 +325,17 @@ export default function SoundCloudConfigPage() {
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-amber-800">
-                    ⚠️ Vous devez être connecté à SoundCloud pour configurer vos paramètres.
+                    {t('soundcloudPage.notConnectedWarning')}
                   </p>
                   <p className="text-xs text-amber-700 mt-1">
-                    Connectez-vous depuis la page Tableau de bord pour activer toutes les fonctionnalités.
+                    {t('soundcloudPage.notConnectedDesc')}
                   </p>
                 </div>
                 <Button
                   onClick={() => router.push('/music/dashboard')}
                   variant="default"
                 >
-                  Aller au Tableau de bord
+                  {t('soundcloudPage.goToDashboard')}
                 </Button>
               </div>
             </CardContent>
@@ -367,7 +347,7 @@ export default function SoundCloudConfigPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-secondary">
-                  Automations
+                  {t('soundcloudPage.automations')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -375,11 +355,11 @@ export default function SoundCloudConfigPage() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <Label htmlFor="follow-unfollow-toggle" className="text-base font-medium text-secondary cursor-pointer">
-                        Engagez avec une fan base qualifiée
+                        {t('soundcloudPage.engageQualifiedFanbase')}
                       </Label>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Engagez automatiquement avec des personnes qui écoutent des styles similaires au vôtre pour développer votre audience.
+                      {t('soundcloudPage.engageQualifiedFanbaseDesc')}
                     </p>
                   </div>
                   <Switch
@@ -394,11 +374,11 @@ export default function SoundCloudConfigPage() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <Label htmlFor="auto-repost-toggle" className="text-base font-medium text-secondary cursor-pointer">
-                        Suivre la trend
+                        {t('soundcloudPage.followTrend')}
                       </Label>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Découvrez et repartagez automatiquement les meilleures morceaux du moment qui correspondent à vos styles musicaux préférés.
+                      {t('soundcloudPage.followTrendDesc')}
                     </p>
                   </div>
                   <Switch
@@ -413,11 +393,11 @@ export default function SoundCloudConfigPage() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <Label htmlFor="engage-with-artists-toggle" className="text-base font-medium text-secondary cursor-pointer">
-                        Connectez avec vos confrères
+                        {t('soundcloudPage.connectWithPeers')}
                       </Label>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Établissez des connexions avec les artistes les plus prometteurs qui partagent vos goûts musicaux pour créer un réseau professionnel.
+                      {t('soundcloudPage.connectWithPeersDesc')}
                     </p>
                   </div>
                   <Switch
@@ -434,19 +414,19 @@ export default function SoundCloudConfigPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-secondary">
-                  Mes commentaires
+                  {t('soundcloudPage.myComments')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="comment-input" className="text-sm font-medium text-gray-700">
-                    Ajouter un commentaire
+                    {t('soundcloudPage.addComment')}
                   </Label>
                   <div className="flex gap-2">
                     <Input
                       id="comment-input"
                       type="text"
-                      placeholder="Entrez un nouveau commentaire..."
+                      placeholder={t('soundcloudPage.enterComment')}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       onKeyDown={(e) => {
@@ -461,7 +441,7 @@ export default function SoundCloudConfigPage() {
                       onClick={handleAddComment}
                       disabled={savingComments || !newComment.trim() || !isSoundCloudConnected}
                     >
-                      {savingComments ? 'Ajout...' : 'Ajouter'}
+                      {savingComments ? t('soundcloudPage.adding') : t('soundcloudPage.add')}
                     </Button>
                   </div>
                 </div>
@@ -469,15 +449,15 @@ export default function SoundCloudConfigPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex items-center justify-between mb-3">
                     <Label className="text-sm font-medium text-gray-700">
-                      Commentaires ({comments.length})
+                      {t('soundcloudPage.comments')} ({comments.length})
                     </Label>
                     {savingComments && (
-                      <span className="text-xs text-gray-500">Sauvegarde...</span>
+                      <span className="text-xs text-gray-500">{t('soundcloudPage.saving')}</span>
                     )}
                   </div>
 
                   {comments.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Aucun commentaire défini.</p>
+                    <p className="text-gray-500 text-sm">{t('soundcloudPage.noComments')}</p>
                   ) : (
                     <div className="flex flex-wrap gap-2 max-h-96 overflow-y-auto p-2 border border-gray-200 rounded-lg">
                       {comments.map((comment, index) => (
@@ -490,7 +470,7 @@ export default function SoundCloudConfigPage() {
                           <button
                             onClick={() => handleRemoveComment(comment)}
                             className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                            aria-label={`Supprimer ${comment}`}
+                            aria-label={`${t('soundcloudPage.remove')} ${comment}`}
                             disabled={savingComments || !isSoundCloudConnected}
                           >
                             <X className="h-3 w-3" />
@@ -510,18 +490,18 @@ export default function SoundCloudConfigPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-secondary">
-                  Styles musicaux
+                  {t('soundcloudPage.musicStyles')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="styles-input" className="text-base font-medium text-secondary mb-2 block">
-                    Styles musicaux <span className="text-gray-500 font-normal">({styles.length}/3)</span>
+                    {t('soundcloudPage.musicStyles')} <span className="text-gray-500 font-normal">({styles.length}/3)</span>
                   </Label>
                   <Input
                     id="styles-input"
                     type="text"
-                    placeholder="Ex: Electronic, Hip-Hop, Rock... (Appuyez sur Entrée ou tapez une virgule pour ajouter)"
+                    placeholder={t('soundcloudPage.stylesPlaceholder')}
                     value={inputValue}
                     onChange={handleInputChange}
                     onKeyDown={handleInputKeyDown}
@@ -530,7 +510,7 @@ export default function SoundCloudConfigPage() {
                   />
                   {styles.length >= 3 && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Maximum 3 styles atteint
+                      {t('soundcloudPage.maxStylesReached')}
                     </p>
                   )}
                 </div>
@@ -548,7 +528,7 @@ export default function SoundCloudConfigPage() {
                         <button
                           onClick={() => removeStyle(index)}
                           className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                          aria-label={`Supprimer ${style}`}
+                          aria-label={`${t('soundcloudPage.remove')} ${style}`}
                           disabled={!isSoundCloudConnected}
                         >
                           <X className="h-3 w-3" />
@@ -560,8 +540,7 @@ export default function SoundCloudConfigPage() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
-                    <strong>💡 Astuce :</strong> Renseignez les styles musicaux qui vous définissent pour toucher un maximum de monde.
-                    Vous pouvez renseigner jusqu'à 3 styles différents. Appuyez sur Entrée ou tapez une virgule pour ajouter un style.
+                    {t('soundcloudPage.stylesTip')}
                   </p>
                 </div>
 
@@ -571,7 +550,7 @@ export default function SoundCloudConfigPage() {
                     onClick={handleSaveStyles}
                     disabled={savingStyles || styles.length === 0 || styles.length > 3 || !isSoundCloudConnected}
                   >
-                    {savingStyles ? 'Sauvegarde...' : 'Sauvegarder'}
+                    {savingStyles ? t('soundcloudPage.saving') : t('common.save')}
                   </Button>
                 </div>
               </CardContent>
@@ -581,7 +560,7 @@ export default function SoundCloudConfigPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-secondary">
-                  Limite de suivi
+                  {t('soundcloudPage.followLimit')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -590,7 +569,7 @@ export default function SoundCloudConfigPage() {
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-700">
-                        Nombre de personnes suivies actuellement :
+                        {t('soundcloudPage.currentFollowing')}
                       </span>
                       <span className="text-lg font-semibold text-secondary">
                         {currentFollowings.toLocaleString()}
@@ -601,13 +580,13 @@ export default function SoundCloudConfigPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="max-followings-input" className="text-base font-medium text-secondary mb-2 block">
-                    Nombre maximum de personnes à suivre
+                    {t('soundcloudPage.maxFollowing')}
                   </Label>
                   <Input
                     id="max-followings-input"
                     type="number"
                     min="0"
-                    placeholder="Ex: 1000"
+                    placeholder={t('soundcloudPage.maxFollowingPlaceholder')}
                     value={maxFollowings === null ? '' : maxFollowings}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -617,11 +596,11 @@ export default function SoundCloudConfigPage() {
                     disabled={!isSoundCloudConnected}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Définissez le nombre maximum de personnes que vous souhaitez suivre. Votre compte sera synchronisé quotidiennement pour respecter cette limite.
+                    {t('soundcloudPage.maxFollowingDesc')}
                   </p>
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
                     <p className="text-xs text-amber-800">
-                      <strong>⚠️ Sécurité :</strong> Un maximum de 100 personnes par jour sera unfollow pour éviter les blocages.
+                      {t('soundcloudPage.securityWarning')}
                     </p>
                   </div>
                 </div>
@@ -632,7 +611,7 @@ export default function SoundCloudConfigPage() {
                     onClick={handleSaveMaxFollowings}
                     disabled={savingMaxFollowings || !isSoundCloudConnected}
                   >
-                    {savingMaxFollowings ? 'Sauvegarde...' : 'Sauvegarder'}
+                    {savingMaxFollowings ? t('soundcloudPage.saving') : t('common.save')}
                   </Button>
                 </div>
               </CardContent>

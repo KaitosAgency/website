@@ -4,14 +4,14 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Dashboard } from "@/components/layout/dashboard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { toast } from "@/components/ui/toast";
-import { AlertCircle, Music, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, CheckCircle, RefreshCw, List } from "lucide-react";
 
-interface Error {
+interface LogEntry {
   id: number;
   created_at: string;
   user_id: string | null;
@@ -19,22 +19,19 @@ interface Error {
   platform: string;
   error_message: string | null;
   log_message: string | null;
+  type: string | null;
 }
 
-interface GroupedErrors {
-  soundcloud: Error[];
-  other: Error[];
-}
+type TabType = 'all' | 'errors' | 'success' | 'refresh';
 
 export default function AdminLogsPage() {
   const router = useRouter();
-  const { user, isAdmin: contextIsAdmin, loading: authLoading, refreshAdminStatus, checkAuth } = useAuth();
+  const { user, loading: authLoading, refreshAdminStatus, checkAuth } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [errors, setErrors] = useState<GroupedErrors>({ soundcloud: [], other: [] });
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [expandedErrors, setExpandedErrors] = useState<Set<number>>(new Set());
-  const [filter, setFilter] = useState<'all' | 'logs' | 'errors'>('all');
+  const [activeTab, setActiveTab] = useState<TabType>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const hasCheckedAdmin = useRef(false);
@@ -51,20 +48,16 @@ export default function AdminLogsPage() {
     checkAdminAndLoad();
   }, [authLoading, user]);
 
-  // Vérifier le rôle admin à chaque accès à la page
   const checkAdminAndLoad = async () => {
     try {
-      // Vérifier l'authentification d'abord
       if (!user) {
         const isAuthenticated = await checkAuth('/music/dashboard/admin/logs');
         if (!isAuthenticated) {
           return;
         }
-        // Attendre que le contexte se mette à jour
         return;
       }
 
-      // Toujours vérifier le rôle admin à chaque accès (sécurité)
       const supabase = createClient();
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
@@ -79,10 +72,8 @@ export default function AdminLogsPage() {
       }
 
       setIsAdmin(true);
-      // Mettre à jour le contexte aussi
       await refreshAdminStatus();
-      // Charger les erreurs
-      await loadErrors();
+      await loadLogs();
     } catch (err) {
       console.error('Erreur:', err);
       toast.error('Erreur de vérification de l\'authentification');
@@ -92,19 +83,23 @@ export default function AdminLogsPage() {
     }
   };
 
-  const loadErrors = async () => {
+  const loadLogs = async () => {
     try {
       const response = await fetch('/api/user/logs');
       if (response.ok) {
         const data = await response.json();
-        setErrors(data.errors || { soundcloud: [], other: [] });
+        const flatLogs = [
+          ...(data.errors?.soundcloud || []),
+          ...(data.errors?.other || [])
+        ];
+        setLogs(flatLogs);
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Erreur lors du chargement des erreurs');
+        setError(errorData.error || 'Erreur lors du chargement des logs');
       }
     } catch (err) {
-      console.error('Erreur lors du chargement des erreurs:', err);
-      setError('Erreur lors du chargement des erreurs');
+      console.error('Erreur lors du chargement des logs:', err);
+      setError('Erreur lors du chargement des logs');
     }
   };
 
@@ -119,40 +114,58 @@ export default function AdminLogsPage() {
     }).format(date);
   };
 
-  const toggleError = (errorId: number) => {
-    setExpandedErrors((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(errorId)) {
-        newSet.delete(errorId);
-      } else {
-        newSet.add(errorId);
-      }
-      return newSet;
-    });
-  };
-
-  // Combiner toutes les erreurs pour la pagination
-  const allErrors = [...errors.soundcloud, ...errors.other]
-    .filter(item => {
-      if (filter === 'all') return true;
-      if (filter === 'errors') return !!item.error_message;
-      if (filter === 'logs') return !item.error_message && !!item.log_message;
-      return true;
-    })
-    .sort((a, b) => {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
+  // Filtrer les logs selon l'onglet actif
+  const filteredLogs = logs.filter(log => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'errors') {
+      return log.type === 'error' || log.type === null;
+    }
+    if (activeTab === 'success') {
+      return log.type === 'workflow_success';
+    }
+    if (activeTab === 'refresh') {
+      return log.type === 'refresh_token';
+    }
+    return false;
+  }).sort((a, b) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   // Calculer la pagination
-  const totalPages = Math.ceil(allErrors.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedErrors = allErrors.slice(startIndex, endIndex);
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
 
-  // Grouper les erreurs paginées par plateforme
-  const paginatedGroupedErrors: GroupedErrors = {
-    soundcloud: paginatedErrors.filter((e) => e.platform === 'soundcloud'),
-    other: paginatedErrors.filter((e) => e.platform === 'other'),
+  // Helper pour obtenir le style selon le type de log
+  const getLogStyle = (log: LogEntry) => {
+    const logType = log.type;
+    if (logType === 'error' || logType === null) {
+      return { iconColor: 'text-red-600', iconBg: 'bg-red-100', text: 'text-red-900' };
+    }
+    if (logType === 'workflow_success') {
+      return { iconColor: 'text-green-600', iconBg: 'bg-green-100', text: 'text-green-900' };
+    }
+    if (logType === 'refresh_token') {
+      return { iconColor: 'text-blue-600', iconBg: 'bg-blue-100', text: 'text-blue-900' };
+    }
+    return { iconColor: 'text-gray-600', iconBg: 'bg-gray-100', text: 'text-gray-900' };
+  };
+
+  // Helper pour obtenir l'icône selon le type de log
+  const getLogIcon = (log: LogEntry) => {
+    const logType = log.type;
+    const style = getLogStyle(log);
+    if (logType === 'error' || logType === null) {
+      return <AlertCircle className={`h-5 w-5 ${style.iconColor}`} />;
+    }
+    if (logType === 'workflow_success') {
+      return <CheckCircle className={`h-5 w-5 ${style.iconColor}`} />;
+    }
+    if (logType === 'refresh_token') {
+      return <RefreshCw className={`h-5 w-5 ${style.iconColor}`} />;
+    }
+    return <List className={`h-5 w-5 ${style.iconColor}`} />;
   };
 
   if (loading || authLoading) {
@@ -189,35 +202,24 @@ export default function AdminLogsPage() {
     );
   }
 
-  const totalErrors = errors.soundcloud.length + errors.other.length;
-
   return (
-    <Dashboard
-      title="Logs"
-      filters={
-        <div className="flex bg-gray-100 rounded-lg p-1">
+    <Dashboard title="Logs">
+      <div className="w-full space-y-6">
+        {/* Filtres */}
+        <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
           <button
-            onClick={() => { setFilter('all'); setCurrentPage(1); }}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${filter === 'all'
+            onClick={() => { setActiveTab('all'); setCurrentPage(1); }}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${activeTab === 'all'
               ? 'bg-white text-gray-900 shadow-sm'
               : 'text-gray-500 hover:text-gray-700'
               }`}
           >
+            <List className="h-3.5 w-3.5" />
             Tout
           </button>
           <button
-            onClick={() => { setFilter('logs'); setCurrentPage(1); }}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${filter === 'logs'
-              ? 'bg-white text-green-700 shadow-sm'
-              : 'text-gray-500 hover:text-green-600'
-              }`}
-          >
-            <CheckCircle className="h-3.5 w-3.5" />
-            Succès
-          </button>
-          <button
-            onClick={() => { setFilter('errors'); setCurrentPage(1); }}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${filter === 'errors'
+            onClick={() => { setActiveTab('errors'); setCurrentPage(1); }}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${activeTab === 'errors'
               ? 'bg-white text-red-700 shadow-sm'
               : 'text-gray-500 hover:text-red-600'
               }`}
@@ -225,29 +227,50 @@ export default function AdminLogsPage() {
             <AlertCircle className="h-3.5 w-3.5" />
             Erreurs
           </button>
+          <button
+            onClick={() => { setActiveTab('success'); setCurrentPage(1); }}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${activeTab === 'success'
+              ? 'bg-white text-green-700 shadow-sm'
+              : 'text-gray-500 hover:text-green-600'
+              }`}
+          >
+            <CheckCircle className="h-3.5 w-3.5" />
+            Succès Workflow
+          </button>
+          <button
+            onClick={() => { setActiveTab('refresh'); setCurrentPage(1); }}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 ${activeTab === 'refresh'
+              ? 'bg-white text-blue-700 shadow-sm'
+              : 'text-gray-500 hover:text-blue-600'
+              }`}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh Token
+          </button>
         </div>
-      }
-    >
-      <div className="w-full space-y-6">
+
         {/* En-tête avec statistiques */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-secondary mb-2">
-                  Logs & Erreurs N8N
+                  {activeTab === 'all' && 'Tous les logs'}
+                  {activeTab === 'errors' && 'Erreurs N8N'}
+                  {activeTab === 'success' && 'Succès Workflow'}
+                  {activeTab === 'refresh' && 'Logs Refresh Token'}
                 </h2>
                 <p className="text-gray-600">
-                  {totalErrors === 0
-                    ? "Aucun log enregistré"
-                    : `${totalErrors} entrée${totalErrors > 1 ? 's' : ''} enregistrée${totalErrors > 1 ? 's' : ''}`
+                  {filteredLogs.length === 0
+                    ? "Aucun log enregistré dans cette catégorie"
+                    : `${filteredLogs.length} entrée${filteredLogs.length > 1 ? 's' : ''} enregistrée${filteredLogs.length > 1 ? 's' : ''}`
                   }
                 </p>
               </div>
-              {totalErrors > 0 && (
+              {filteredLogs.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-lg px-4 py-2">
-                    {allErrors.length}
+                    {filteredLogs.length}
                   </Badge>
                 </div>
               )}
@@ -255,151 +278,45 @@ export default function AdminLogsPage() {
           </CardContent>
         </Card>
 
-        {/* Section SoundCloud */}
-        {paginatedGroupedErrors.soundcloud.length > 0 && (
+        {/* Liste des logs */}
+        {paginatedLogs.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5" />
-                SoundCloud
-                <Badge variant="secondary" className="ml-2">
-                  {errors.soundcloud.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {paginatedGroupedErrors.soundcloud.map((error) => {
-                  const isExpanded = expandedErrors.has(error.id);
-                  const isError = !!error.error_message;
-                  const style = isError
-                    ? { bg: 'bg-red-50', border: 'border-red-200', hover: 'hover:bg-red-100', text: 'text-red-900', iconColor: 'text-red-600' }
-                    : { bg: 'bg-green-50', border: 'border-green-200', hover: 'hover:bg-green-100', text: 'text-green-900', iconColor: 'text-green-600' };
+            <CardContent className="p-0">
+              <div className="divide-y divide-gray-100">
+                {paginatedLogs.map((log) => {
+                  const style = getLogStyle(log);
 
                   return (
                     <div
-                      key={error.id}
-                      className={`border ${style.border} ${style.bg} rounded-lg overflow-hidden`}
+                      key={log.id}
+                      className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
                     >
-                      <button
-                        onClick={() => toggleError(error.id)}
-                        className={`w-full p-4 flex items-start justify-between ${style.hover} transition-colors`}
-                      >
-                        <div className="flex items-center gap-2 flex-1">
-                          {isError ? (
-                            <AlertCircle className={`h-5 w-5 ${style.iconColor} flex-shrink-0`} />
-                          ) : (
-                            <CheckCircle className={`h-5 w-5 ${style.iconColor} flex-shrink-0`} />
-                          )}
-                          <div className="text-left">
-                            <span className={`font-medium ${style.text} block`}>
-                              {isError ? 'Erreur' : 'Succès'} #{error.id}
-                            </span>
-                            {error.fullname && (
-                              <span className="text-xs text-gray-600 mt-1 block">
-                                {error.fullname}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-gray-500">
-                            {formatDate(error.created_at)}
-                          </span>
-                          {isExpanded ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          )}
-                        </div>
-                      </button>
-                      {isExpanded && (
-                        <div className={`px-4 pb-4 pt-2 border-t ${style.border}`}>
-                          {error.error_message && (
-                            <div className="mt-2 p-3 bg-white rounded border border-red-100">
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                {error.error_message}
-                              </p>
-                            </div>
-                          )}
-                          {error.log_message && (
-                            <div className="mt-2 p-3 bg-white rounded border border-green-100">
-                              <p className="font-semibold text-xs text-green-700 mb-1">Logs:</p>
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                {error.log_message}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                      <div className={`p-2 rounded-full ${style.iconBg} flex-shrink-0`}>
+                        {getLogIcon(log)}
+                      </div>
 
-        {/* Section Autres erreurs */}
-        {paginatedGroupedErrors.other.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Autres logs
-                <Badge variant="secondary" className="ml-2">
-                  {errors.other.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {paginatedGroupedErrors.other.map((error) => {
-                  const isExpanded = expandedErrors.has(error.id);
-                  return (
-                    <div
-                      key={error.id}
-                      className="border border-gray-200 bg-gray-50 rounded-lg overflow-hidden"
-                    >
-                      <button
-                        onClick={() => toggleError(error.id)}
-                        className="w-full p-4 flex items-start justify-between hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center gap-2 flex-1">
-                          <AlertCircle className="h-5 w-5 text-gray-600 flex-shrink-0" />
-                          <div className="text-left">
-                            <span className="font-medium text-gray-900 block">
-                              Log #{error.id}
-                            </span>
-                            {error.fullname && (
-                              <span className="text-xs text-gray-600 mt-1 block">
-                                {error.fullname}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-gray-500">
-                            {formatDate(error.created_at)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`font-medium ${style.text}`}>
+                            #{log.id}
                           </span>
-                          {isExpanded ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {log.platform === 'soundcloud' ? 'SoundCloud' : 'Autre'}
+                          </Badge>
+                          {log.fullname && (
+                            <span className="text-xs text-gray-500">
+                              • {log.fullname}
+                            </span>
                           )}
                         </div>
-                      </button>
-                      {isExpanded && (
-                        <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                          {error.error_message && (
-                            <div className="mt-2 p-3 bg-white rounded border border-gray-100">
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                {error.error_message}
-                              </p>
-                            </div>
-                          )}
+                        <div className="text-sm text-gray-600 truncate">
+                          {log.error_message || log.log_message || "Aucun détail"}
                         </div>
-                      )}
+                      </div>
+
+                      <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
+                        {formatDate(log.created_at)}
+                      </span>
                     </div>
                   );
                 })}
@@ -414,7 +331,7 @@ export default function AdminLogsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Page {currentPage} sur {totalPages} ({allErrors.length} entrée{allErrors.length > 1 ? 's' : ''})
+                  Page {currentPage} sur {totalPages} ({filteredLogs.length} entrée{filteredLogs.length > 1 ? 's' : ''})
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -427,17 +344,23 @@ export default function AdminLogsPage() {
                     Précédent
                   </Button>
                   <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(page)}
-                        className="min-w-[2.5rem]"
-                      >
-                        {page}
-                      </Button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      if (totalPages > 10 && Math.abs(page - currentPage) > 2 && page !== 1 && page !== totalPages) {
+                        if (Math.abs(page - currentPage) === 3) return <span key={page} className="px-1 text-gray-400">...</span>;
+                        return null;
+                      }
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className="min-w-[2.5rem]"
+                        >
+                          {page}
+                        </Button>
+                      )
+                    })}
                   </div>
                   <Button
                     variant="outline"
@@ -454,16 +377,24 @@ export default function AdminLogsPage() {
           </Card>
         )}
 
-        {/* Message si aucune erreur */}
-        {totalErrors === 0 && (
+        {/* Message si aucun log dans la catégorie */}
+        {filteredLogs.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
-              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              {activeTab === 'errors' ? (
+                <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              ) : activeTab === 'success' ? (
+                <CheckCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              ) : activeTab === 'refresh' ? (
+                <RefreshCw className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              ) : (
+                <List className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              )}
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
                 Aucun log
               </h3>
               <p className="text-gray-500">
-                Aucune donnée à afficher.
+                Aucune donnée à afficher pour cette catégorie.
               </p>
             </CardContent>
           </Card>
