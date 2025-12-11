@@ -66,6 +66,7 @@ interface PlatformProfileCardProps {
         reauthenticate: string;
         disconnect: string;
         disconnectDesc: string;
+        settings?: string;
         plan?: string;
         tokenValid?: string;
         account?: string;
@@ -117,7 +118,7 @@ export function PlatformProfileCard({
                 }}
             >
                 {/* Platform badge */}
-                <div className="absolute top-3 left-3 flex flex-col items-start gap-1">
+                <div className="absolute top-4 left-4 flex flex-col items-start gap-1">
                     <div className="flex items-center gap-2">
                         {platformIcon && (
                             <div className="w-6 h-6 text-white/90 flex items-center justify-center">
@@ -137,12 +138,12 @@ export function PlatformProfileCard({
                         >
                             {/* Loading State */}
                             {isCheckingToken ? (
-                                <div className="h-full px-2.5 flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                                    <RefreshCw className="w-3 h-3 animate-spin" />
-                                    <span>{labels.checking}</span>
+                                <div className="h-full flex items-center gap-1.5">
+                                    <RefreshCw className="w-3 h-3 animate-spin text-gray-600" />
+                                    <span className="text-[10px] font-medium tracking-wide text-gray-600">{labels.checking}</span>
                                 </div>
                             ) : isTokenValid === undefined ? (
-                                <div className="h-full px-2.5 flex items-center">
+                                <div className="h-full flex items-center">
                                     <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></span>
                                 </div>
                             ) : (
@@ -171,25 +172,37 @@ export function PlatformProfileCard({
                     )}
                 </div>
 
-                {/* Top right buttons (profile link + settings) */}
-                <div className="absolute top-3 right-3 flex items-center gap-2">
-                    {profileUrl && (
-                        <a
-                            href={profileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                            title={labels.viewProfile}
-                        >
-                            <ExternalLink className="w-4 h-4 text-white/80" />
-                        </a>
-                    )}
-                    {onSettings && (
+                {/* Top right buttons (profile link + settings, disconnect below) */}
+                <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1">
+                        {profileUrl && (
+                            <a
+                                href={profileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                                title={labels.viewProfile}
+                            >
+                                <ExternalLink className="w-3 h-3 text-white/80" />
+                            </a>
+                        )}
+                        {onSettings && (
+                            <button
+                                onClick={onSettings}
+                                className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                                title={labels.settings || 'Settings'}
+                            >
+                                <Settings className="w-3 h-3 text-white/80" />
+                            </button>
+                        )}
+                    </div>
+                    {onDisconnect && (
                         <button
-                            onClick={onSettings}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            onClick={onDisconnect}
+                            className="w-6 h-6 rounded-md bg-transparent hover:bg-red-500/80 flex items-center justify-center transition-colors text-white/60 hover:text-white"
+                            title={labels.disconnect}
                         >
-                            <Settings className="w-4 h-4 text-white/80" />
+                            <LogOut className="w-3 h-3" />
                         </button>
                     )}
                 </div>
@@ -219,7 +232,7 @@ export function PlatformProfileCard({
             </div>
 
             {/* Content */}
-            <CardContent className="pt-16 pb-6 px-6 text-center">
+            <CardContent className="pt-16 pb-4 px-4 text-center">
                 {/* Name & Username */}
                 <h3 className="text-xl font-bold text-secondary mb-1">{displayName}</h3>
                 <p className="text-gray-500 text-sm mb-2">@{username}</p>
@@ -287,7 +300,7 @@ export function PlatformProfileCard({
 
                 {/* Automation Toggle */}
                 {onAutomationChange && (
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-left flex-1">
                                 <div className="flex items-center gap-2">
@@ -296,9 +309,6 @@ export function PlatformProfileCard({
                                         {automationLabel || 'Automation'}
                                     </Label>
                                 </div>
-                                {automationDescription && (
-                                    <p className="text-xs text-gray-500 mt-1">{automationDescription}</p>
-                                )}
                             </div>
                             <Switch
                                 checked={automationEnabled || false}
@@ -312,21 +322,7 @@ export function PlatformProfileCard({
                     </div>
                 )}
 
-                {/* Disconnect Button */}
-                {onDisconnect && (
-                    <div className="border-t border-gray-100 pt-4">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onDisconnect}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
-                        >
-                            <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                            {labels.disconnect}
-                        </Button>
-                        <p className="text-xs text-gray-400 mt-1">{labels.disconnectDesc}</p>
-                    </div>
-                )}
+
             </CardContent>
         </Card >
     );
@@ -336,21 +332,32 @@ export function PlatformProfileCard({
 export function PlatformProfileCardSkeleton() {
     return (
         <Card className="overflow-hidden w-full max-w-md mx-auto">
-            <div className="relative h-28 bg-gradient-to-br from-gray-300 to-gray-400 animate-pulse" />
-            <CardContent className="pt-16 pb-6 px-6 text-center">
-                <div className="absolute top-[6.5rem] left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full bg-gray-200 animate-pulse border-4 border-white" />
+            {/* Header skeleton */}
+            <div className="relative h-28 bg-gradient-to-br from-gray-300 to-gray-400 animate-pulse">
+                {/* Platform badge skeleton */}
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded bg-white/30" />
+                    <div className="w-20 h-4 rounded bg-white/30" />
+                </div>
+
+                {/* Avatar skeleton - positioned like in real component */}
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                    <div className="w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-lg" />
+                </div>
+            </div>
+
+            <CardContent className="pt-16 pb-4 px-4 text-center">
                 <Skeleton className="h-6 w-32 mx-auto mb-2" />
                 <Skeleton className="h-4 w-24 mx-auto mb-4" />
-                <div className="flex justify-center gap-6 py-4 border-y border-gray-100 mb-4">
+                <div className="grid grid-cols-4 gap-2 py-4 border-y border-gray-100 mb-4">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i} className="text-center">
-                            <Skeleton className="h-6 w-10 mx-auto mb-1" />
-                            <Skeleton className="h-3 w-14" />
+                            <Skeleton className="h-5 w-10 mx-auto mb-1" />
+                            <Skeleton className="h-3 w-12 mx-auto" />
                         </div>
                     ))}
                 </div>
-                <Skeleton className="h-20 w-full rounded-lg mb-4" />
-                <Skeleton className="h-16 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
             </CardContent>
         </Card>
     );

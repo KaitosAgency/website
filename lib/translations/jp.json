@@ -26,6 +26,7 @@
     "dashboard": "ダッシュボード",
     "soundcloud": "SoundCloud",
     "spotify": "Spotify",
+    "bandcamp": "Bandcamp",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "comingSoon": "近日公開",
@@ -59,13 +60,14 @@
     "tokenValid": "トークン有効 - 接続アクティブ",
     "account": "アカウント",
     "reauthenticate": "SoundCloudで再認証",
-    "automation": "オートメーション",
-    "automationDesc": "SoundCloudアカウントのオートメーションを有効化",
-    "automationEnabled": "オートメーション有効",
-    "automationDisabled": "オートメーション無効",
-    "tokenRequired": "オートメーションを有効にするにはトークンが有効である必要があります",
+    "automation": "オートパイロット",
+    "automationDesc": "SoundCloudアカウントのオートパイロットを有効にする",
+    "automationEnabled": "オートパイロット有効",
+    "automationDisabled": "オートパイロット無効",
+    "tokenRequired": "オートパイロットを有効にするにはトークンが有効である必要があります",
     "disconnect": "切断",
     "disconnectDesc": "このアクションは、プラットフォームからアカウントを切断し、すべてのオートメーションを停止します。",
+    "settings": "設定",
     "disconnectSuccess": "SoundCloud切断成功",
     "disconnectError": "SoundCloud切断エラー",
     "welcomeTitle": "ダッシュボードへようこそ",
@@ -76,7 +78,8 @@
     "title": "SoundCloud設定",
     "loading": "読み込み中...",
     "notConnectedWarning": "⚠️ 設定を構成するにはSoundCloudに接続する必要があります。",
-    "notConnectedDesc": "ダッシュボードページから接続して、すべての機能を有効化してください。",
+    "notConnectedDesc": "すべての機能を有効にするには、ダッシュボードページからログインしてください。",
+    "enableAutopilotFirst": "オートパイロットが無効です。これらの機能を設定するにはダッシュボードで有効にしてください。",
     "goToDashboard": "ダッシュボードへ",
     "automations": "オートメーション",
     "engageQualifiedFanbase": "質の高いファンベースと交流",
@@ -126,62 +129,63 @@
     "cta": "今日から始める"
   },
   "music": {
-    "tagline": "SoundCloud管理ツール",
-    "title": "ワンクリックで\nSoundCloudアカウントを管理",
-    "description": "レーベルとアーティストがSoundCloudアカウントを接続し、分析を表示し、公開をスケジュールし、一元化されたインターフェースから複数のプロフィールを管理できるプライベートダッシュボード。",
-    "cta": "Soundcloudに接続",
+    "title": "音楽キャリアを\n加速させる",
+    "tagline": "インディーズアーティスト & レーベル向け",
+    "description": "SNS管理、質の高いオーディエンスとのエンゲージメント、成長の自動化を実現するオールインワンのプラットフォーム。",
+    "cta": "今すぐ始める",
+    "ctaSub": "ベータ期間中は無料",
     "learnMore": "詳細を見る",
-    "sectionTitle": "SoundCloud Label Manager：あなたの管理ツール",
-    "sectionDescription": "Kaitosが開発した内部ツールで、音楽レーベルとアーティストが自動化、分析、最適化されたワークフローで複数のSoundCloudアカウントを効率的に管理できるようにします。",
-    "forLabels": {
-      "title": "音楽レーベル向け",
-      "description": "単一のインターフェースから複数のSoundCloudアカウントの管理を簡素化します。操作を一元化し、ワークフローを自動化し、プラットフォームでの存在感を最適化します。",
-      "items": [
-        "複数アカウントの一元管理",
-        "自動化された公開ワークフロー",
-        "詳細な分析と統合レポート",
-        "アップロードのスケジューリング"
-      ]
-    },
-    "forArtists": {
-      "title": "アーティスト向け",
-      "description": "プロフェッショナルなツールでSoundCloudでの存在感を効率的に管理します。パフォーマンスを追跡し、リリースをスケジュールし、コンテンツ戦略を最適化します。",
-      "items": [
-        "安全なアカウント接続",
-        "リアルタイム分析の可視化",
-        "公開のスケジュール",
-        "簡素化されたマルチプロフィール管理"
-      ]
+    "sectionTitle": "完全なエコシステム",
+    "sectionDescription": "プラットフォームを接続し、プレゼンスを管理し、単一のインターフェースからファンベースを拡大します。",
+    "hero": {
+      "badge": "ベータフェーズ - 無料アクセス"
     },
     "features": {
       "title": "主な機能",
-      "description": "当社のツールは、自動化と高度なインサイトを備えたSoundCloudアカウントのプロフェッショナルな管理に必要なすべての機能を提供します。",
+      "description": "アーティストとレーベルのために設計された強力なツール。",
+      "centralization": {
+        "title": "一元管理",
+        "description": "複数のタブはもう不要です。SoundCloud、そして近日中にSpotify、YouTube、TikTok、Bandcampを1か所で管理できます。"
+      },
+      "targeting": {
+        "title": "スマートターゲティング",
+        "description": "独自のアルゴリズムがボットや不要なユーザーをフィルタリングし、あなたのスタイルに合ったリスナーやアーティストとのみつながります。"
+      },
       "automation": {
-        "title": "自動化",
-        "description": "公開およびコンテンツ管理ワークフローを自動化します。アップロードをスケジュールし、メタデータを管理し、反復的なプロセスを最適化します。"
+        "title": "自動化 (オートパイロット)",
+        "description": "オートパイロットにお任せください。指一本動かすことなく、24時間365日コミュニティと交流できます。"
       },
-      "analytics": {
-        "title": "分析とインサイト",
-        "description": "すべてのアカウントの詳細で統合された分析にアクセスします。パフォーマンスを可視化し、傾向を特定し、情報に基づいた決定を行います。"
-      },
-      "workflow": {
-        "title": "公開ワークフロー",
-        "description": "最適化されたワークフローで公開を計画およびスケジュールします。一元化されたインターフェースからメタデータ、タグ、説明を管理します。"
-      },
-      "multiAccount": {
-        "title": "マルチアカウント管理",
-        "description": "単一のダッシュボードから複数のSoundCloudアカウントを接続および管理します。異なるプロフィール間を簡単に切り替え、操作を一元化します。"
+      "labels": {
+        "title": "マルチアカウント & レーベル",
+        "description": "近日公開：単一のマスターアカウントから複数のアーティストやプロフィールを管理できます。レーベルやマネージャーに最適です。"
       }
     },
-    "about": {
-      "title": "開発中のツール",
-      "paragraph1": "SoundCloud Label Managerは現在プロトタイプ段階です。このツールは、音楽業界のパートナークライアント向けにKaitosが内部で開発しています。",
-      "paragraph2": "アプリケーションは公開されておらず、直接協力しているレーベルとアーティストのみが内部で使用します。複数のSoundCloudアカウント管理の特定のニーズに対応するために、このツールを開発しています。",
-      "paragraph3": "SoundCloud APIアクセス：このツールに必要な高度な機能を開発するために、SoundCloudのクローズドAPIへのアクセスをリクエストしました。これには、OAuth認証と拡張アカウント管理エンドポイントが含まれます。"
+    "platforms": {
+      "title": "お気に入りのプラットフォーム",
+      "subtitle": "新しい統合を常に追加しています。",
+      "operational": "稼働中",
+      "comingSoon": "近日公開",
+      "distribution": "配信 (近日公開)"
+    },
+    "pricing": {
+      "title": "無料アクセス",
+      "description": "ベータフェーズ期間中、Kaitos Musicへのアクセスは完全に無料です。",
+      "list": [
+        "SoundCloud接続無制限",
+        "高度なエンゲージメントツール",
+        "優先サポート",
+        "新機能への早期アクセス"
+      ]
     },
     "ctaSection": {
-      "title": "このツールに興味がありますか？",
-      "description": "Kaitosと協力しているレーベルまたはアーティストで、このツールについて詳しく知りたい、またはアクセスをリクエストしたい場合は、詳細についてお問い合わせください。"
+      "title": "準備はいいですか？",
+      "description": "すでにKaitosを使用してオーディエンスを拡大しているアーティストの仲間に加わりましょう。"
+    },
+    "about": {
+      "title": "Kaitos Musicについて",
+      "paragraph1": "Kaitos Musicは、インディーズアーティストやレーベルがデジタルプレゼンスの主導権を取り戻せるようにするというシンプルなニーズから生まれました。",
+      "paragraph2": "私たちの使命は、誰でも利用できるプロフェッショナルなレベルのツールを提供し、音楽キャリア管理を民主化することです。",
+      "paragraph3": "プロジェクトステータス：パブリックベータ"
     }
   },
   "navigation": {

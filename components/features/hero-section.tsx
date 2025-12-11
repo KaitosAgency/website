@@ -62,24 +62,19 @@ export function HeroSection({
           sizes="100vw"
         />
       </div>
-      
-      {/* Overlay dégradé secondary en haut */}
-      <div className={`absolute inset-0 h-[30%] bg-gradient-to-b ${overlay.top} to-transparent to-100% z-5`}></div>
-      {/* Overlay dégradé secondary en bas */}
-      <div className={`absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t ${overlay.bottom} to-transparent to-100% z-5`}></div>
-      
-      {/* Overlay supplémentaire pour améliorer la lisibilité */}
-      <div className="absolute inset-0 bg-black/20 z-5"></div>
-      
+
+      {/* Overlay dégradé secondary en haut - même couleur que la barre de menu */}
+      <div className="absolute top-0 left-0 right-0 h-[160px] bg-gradient-to-b from-secondary via-secondary to-transparent z-5"></div>
+
       {/* Contenu Hero */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-white text-center gap-6 px-4 py-24">
+      <div className="relative z-10 flex flex-col items-center justify-end w-full h-full text-white text-center gap-6 px-4 pb-8 pt-48">
         {(showStars || tagline) && (
           <div className="flex flex-col items-center gap-2">
             {showStars && (
               <div className="flex gap-1">
                 {[...Array(5)].map((_, index) => (
                   <svg key={index} width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="text-gold drop-shadow-sm">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 ))}
               </div>
@@ -95,24 +90,14 @@ export function HeroSection({
         </p>
         {ctaText && (
           <div className="flex gap-4 justify-center mt-6">
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="bg-offwhite text-secondary hover:bg-primary hover:text-offwhite flex items-center gap-1 shadow-lg"
-              asChild={!!ctaHref && !ctaOnClick}
+            <Button
+              variant="primary"
+              size="lg"
+              className="flex items-center gap-2"
               onClick={ctaOnClick}
             >
-              {ctaHref && !ctaOnClick ? (
-                <a href={ctaHref}>
-                  {ctaText}
-                  <ArrowIcon size={18} />
-                </a>
-              ) : (
-                <span>
-                  {ctaText}
-                  <ArrowIcon size={18} />
-                </span>
-              )}
+              {ctaText}
+              <ArrowIcon size={18} />
             </Button>
           </div>
         )}

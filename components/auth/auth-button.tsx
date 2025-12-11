@@ -35,17 +35,17 @@ export function AuthButton({ isDarkPage = false }: AuthButtonProps) {
     const checkUser = async () => {
       try {
         const { data: { user: currentUser } } = await supabase.auth.getUser()
-        
+
         if (currentUser) {
           setUser(currentUser)
-          
+
           // Récupérer le profil utilisateur
           const { data: userProfile } = await supabase
             .from('user_profiles')
             .select('*')
             .eq('id', currentUser.id)
             .single()
-          
+
           if (userProfile) {
             setProfile(userProfile)
           }
@@ -94,17 +94,28 @@ export function AuthButton({ isDarkPage = false }: AuthButtonProps) {
   }, [router])
 
   const handleSignOut = async () => {
+    // Nettoyer tous les caches locaux
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('soundcloud_token_status');
+        localStorage.removeItem('soundcloud_user_data');
+        localStorage.removeItem('soundcloud_config_data');
+        localStorage.removeItem('soundcloud_automation');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_is_admin');
+        sessionStorage.removeItem('session_data_loaded');
+      } catch {
+        // Ignorer les erreurs de nettoyage
+      }
+    }
     try {
       const supabase = createClient()
       await supabase.auth.signOut()
-      router.push('/')
-      router.refresh()
     } catch (error) {
       console.error('Error signing out:', error)
-      // Rediriger quand même vers la page d'accueil
-      router.push('/')
-      router.refresh()
     }
+    // Forcer un rechargement complet pour réinitialiser tous les états React
+    window.location.href = '/'
   }
 
   if (loading) {
@@ -115,16 +126,15 @@ export function AuthButton({ isDarkPage = false }: AuthButtonProps) {
 
   if (user && profile) {
     const displayName = profile.fullname || profile.email?.split('@')[0] || 'Utilisateur'
-    
+
     return (
       <div className="flex items-center gap-2">
         <Link
           href="/profile"
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${
-            isDarkPage
-              ? 'text-white/90 hover:text-white hover:bg-white/10'
-              : 'text-secondary hover:text-primary hover:bg-secondary/5'
-          }`}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${isDarkPage
+            ? 'text-white/90 hover:text-white hover:bg-white/10'
+            : 'text-secondary hover:text-primary hover:bg-secondary/5'
+            }`}
         >
           <User className="h-4 w-4 flex-shrink-0" />
           <span className="text-sm font-medium max-w-[120px] truncate hidden sm:inline">{displayName}</span>
@@ -134,11 +144,10 @@ export function AuthButton({ isDarkPage = false }: AuthButtonProps) {
           variant="ghost"
           size="icon"
           onClick={handleSignOut}
-          className={`h-9 w-9 ${
-            isDarkPage
-              ? 'text-white/80 hover:text-white hover:bg-white/10'
-              : 'text-secondary/80 hover:text-secondary hover:bg-secondary/5'
-          }`}
+          className={`h-9 w-9 ${isDarkPage
+            ? 'text-white/80 hover:text-white hover:bg-white/10'
+            : 'text-secondary/80 hover:text-secondary hover:bg-secondary/5'
+            }`}
           title="Déconnexion"
         >
           <LogOut className="h-4 w-4" />

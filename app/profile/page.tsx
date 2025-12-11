@@ -25,7 +25,7 @@ export default function ProfilePage() {
 
     const loadProfile = async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
+
       if (!currentUser) {
         router.push('/auth/login')
         return
@@ -70,10 +70,24 @@ export default function ProfilePage() {
   }
 
   const handleSignOut = async () => {
+    // Nettoyer tous les caches locaux
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('soundcloud_token_status');
+        localStorage.removeItem('soundcloud_user_data');
+        localStorage.removeItem('soundcloud_config_data');
+        localStorage.removeItem('soundcloud_automation');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_is_admin');
+        sessionStorage.removeItem('session_data_loaded');
+      } catch {
+        // Ignorer les erreurs de nettoyage
+      }
+    }
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    // Forcer un rechargement complet pour réinitialiser tous les états React
+    window.location.href = '/'
   }
 
   if (loading) {

@@ -4,13 +4,17 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
   try {
     const supabase = await createClient();
-    
+
     // Vérifier l'authentification
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        {
+          error: 'Unauthorized',
+          authFailed: true, // Supabase session expired, not SoundCloud token issue
+          message: 'Session expirée. Veuillez vous reconnecter.'
+        },
         { status: 401 }
       );
     }

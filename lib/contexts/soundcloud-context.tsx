@@ -338,14 +338,23 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
             toast.error('Token SoundCloud invalide');
           }
         }
+      } else if (data.authFailed) {
+        // Supabase session expired - don't mark SoundCloud token as invalid
+        // The auth system will handle session refresh
+        console.log('Supabase session expired, waiting for refresh...');
+        // Don't update state or cache - let auth system handle it
+        // Just reset checking state
+        if (showToast) {
+          toast.error('Session expirée. Reconnexion en cours...');
+        }
       } else {
         console.error('Erreur vérification token:', data);
         const errorMessage = data.message || data.error || 'Erreur lors de la vérification';
         const status: TokenStatus = {
           valid: false,
-          connected: false,
+          connected: data.connected ?? false,
           message: errorMessage,
-          needsReauth: response.status === 401 || response.status === 404,
+          needsReauth: data.needsReauth ?? false,
           lastVerified: Date.now(),
         };
         setTokenStatus(status);
@@ -364,15 +373,18 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
         errorMessage = err.message || errorMessage;
       }
 
+      // Ne pas sauvegarder les erreurs temporaires (réseau, timeout) en cache
+      // Car elles ne reflètent pas le vrai état du token SoundCloud
       const status: TokenStatus = {
         valid: false,
         connected: false,
         message: errorMessage,
-        needsReauth: true,
+        needsReauth: false, // Don't suggest reauth for temp errors
         lastVerified: Date.now(),
       };
       setTokenStatus(status);
-      saveToCache(status);
+      // DON'T save to cache for temporary errors
+      // saveToCache(status);
 
       if (showToast) {
         toast.error(errorMessage);
@@ -415,14 +427,11 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       return false;
     };
 
-    // Charger le cache et vérifier le token si nécessaire
+    // Charger le cache
     const hasValidCache = loadCachedStatus();
-    if (!hasValidCache) {
-      // Vérifier le token au démarrage si pas de cache valide
-      verifyToken(false).catch((err) => {
-        console.error('Erreur lors de la vérification initiale du token:', err);
-      });
-    }
+
+    // Ne PAS vérifier le token automatiquement au démarrage
+    // La vérification sera faite quand l'utilisateur accède au dashboard
   }, [verifyToken]);
 
   const clearTokenStatus = useCallback(() => {
@@ -473,7 +482,6 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const userData = await response.json();
         setSoundcloudUser(userData);
-        // Mettre en cache
         try {
           if (typeof window !== 'undefined') {
             localStorage.setItem(CACHE_USER_KEY, JSON.stringify({
@@ -485,23 +493,29 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
           console.error('Erreur lors de la sauvegarde du cache utilisateur:', err);
         }
       } else if (response.status === 401) {
-        // Pas connecté à SoundCloud - c'est normal, ne pas logger d'erreur
-        setSoundcloudUser(null);
-        // Nettoyer le cache si présent
+        let data;
         try {
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem(CACHE_USER_KEY);
-          }
-        } catch (err) {
-          // Ignorer les erreurs de nettoyage du cache
+          data = await response.json();
+        } catch {
+          data = {};
         }
-      } else {
-        // Autre erreur HTTP - logger seulement si ce n'est pas un 401
-        console.error('Erreur lors du chargement de l\'utilisateur SoundCloud:', response.status, response.statusText);
+
+        if (data.authFailed) {
+          // Supabase session expired - don't clear cache, let auth system handle it
+        } else {
+          // Not connected to SoundCloud
+          setSoundcloudUser(null);
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem(CACHE_USER_KEY);
+            }
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
       }
-    } catch (err) {
-      // Ne logger que les erreurs réseau, pas les 401 attendus
-      console.error('Erreur réseau lors du chargement de l\'utilisateur SoundCloud:', err);
+    } catch {
+      // Silently ignore network errors
     } finally {
       setLoadingUser(false);
     }
@@ -685,86 +699,75 @@ export function SoundCloudProvider({ children }: { children: ReactNode }) {
     const preloadData = async () => {
       // Vérifier si c'est un hard refresh
       const hardRefresh = isHardRefresh();
-      // Lire les valeurs cachées directement (pas via les states qui peuvent être stale)
       const cachedUser = getInitialCachedUser();
       const hasCachedUser = cachedUser !== null;
 
-      debugLog('Preload check:', {
-        hardRefresh,
-        hasCachedUser,
-      });
-
       // Si les données sont déjà chargées depuis le cache et ce n'est pas un hard refresh, skip
       if (!hardRefresh && hasCachedUser) {
-        debugLog('Skipping preload - data already loaded from cache');
         sessionStorage.setItem(SESSION_LOADED_KEY, 'true');
         setSessionDataLoaded(true);
         setInitialLoadComplete(true);
         return;
       }
 
-      // Si c'est un hard refresh, on force le rechargement
-      if (hardRefresh) {
-        debugLog('Hard refresh detected - forcing reload');
-      }
-
       // Vérifier l'authentification Supabase d'abord
       try {
         const supabase = createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        let user = null;
+        let authError = null;
+
+        // Premier essai
+        const firstTry = await supabase.auth.getUser();
+        user = firstTry.data?.user;
+        authError = firstTry.error;
+
+        // Si pas d'utilisateur, attendre un peu et réessayer (la session peut être en cours de restauration)
+        if (!user && !authError) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const secondTry = await supabase.auth.getUser();
+          user = secondTry.data?.user;
+          authError = secondTry.error;
+        }
 
         if (authError || !user) {
-          debugLog('No authenticated user, skipping SoundCloud load');
           setInitialLoadComplete(true);
           return;
         }
 
-        // Si hard refresh, forcer le rechargement
         const forceRefresh = hardRefresh;
-        debugLog('Loading SoundCloud data...', { forceRefresh });
 
         // Charger toutes les données en parallèle
         await Promise.all([
-          loadSoundCloudUser(forceRefresh).catch((err) => {
-            // Ne pas logger les erreurs 401 car c'est normal si l'utilisateur n'est pas connecté à SoundCloud
-            if (err?.status !== 401 && err?.response?.status !== 401) {
-              console.error('Erreur lors du chargement de l\'utilisateur SoundCloud:', err);
-            }
-          }),
-          loadConfig(forceRefresh).catch((err) => {
-            console.error('Erreur lors du chargement de la config:', err);
-          }),
-          loadAutomation(forceRefresh).catch((err) => {
-            console.error('Erreur lors du chargement de l\'automation:', err);
-          }),
+          loadSoundCloudUser(forceRefresh).catch(() => { }),
+          loadConfig(forceRefresh).catch(() => { }),
+          loadAutomation(forceRefresh).catch(() => { }),
         ]);
 
-        debugLog('SoundCloud data loaded successfully');
-
-        // Marquer la session comme ayant chargé les données
         sessionStorage.setItem(SESSION_LOADED_KEY, 'true');
         setSessionDataLoaded(true);
-      } catch (err) {
-        console.error('Erreur lors du préchargement:', err);
+      } catch {
+        // Silently ignore errors
       } finally {
         setInitialLoadComplete(true);
       }
     };
 
     preloadData();
-    // Ce useEffect ne doit s'exécuter qu'une seule fois au montage
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Ref pour éviter la vérification en boucle
+  const hasAttemptedTokenVerification = useRef(false);
+
   // Vérifier automatiquement le token quand l'utilisateur SoundCloud est chargé
-  // Mais seulement si le token n'a pas encore été vérifié dans cette session
+  // Mais seulement une fois par session
   useEffect(() => {
-    if (soundcloudUser && initialLoadComplete) {
+    if (soundcloudUser && initialLoadComplete && !hasAttemptedTokenVerification.current) {
       // Si on a un utilisateur SoundCloud mais pas de tokenStatus valide, vérifier le token
-      // Mais seulement si ce n'est pas déjà en cours de vérification
       if ((!tokenStatus || !tokenStatus.valid) && !checkingToken) {
-        verifyToken(false, false).catch((err) => {
-          console.error('Erreur lors de la vérification automatique du token:', err);
+        hasAttemptedTokenVerification.current = true;
+        verifyToken(false, false).catch(() => {
+          // Silently ignore errors
         });
       }
     }

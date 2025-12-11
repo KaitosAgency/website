@@ -26,6 +26,7 @@
     "dashboard": "Dashboard",
     "soundcloud": "SoundCloud",
     "spotify": "Spotify",
+    "bandcamp": "Bandcamp",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "comingSoon": "Soon",
@@ -59,13 +60,14 @@
     "tokenValid": "Token valid - Connection active",
     "account": "Account",
     "reauthenticate": "Re-authenticate with SoundCloud",
-    "automation": "Automation",
-    "automationDesc": "Enable automation for your SoundCloud account",
-    "automationEnabled": "Automation enabled",
-    "automationDisabled": "Automation disabled",
-    "tokenRequired": "Token must be valid to enable automation",
+    "automation": "Autopilot",
+    "automationDesc": "Enable Autopilot for your SoundCloud account",
+    "automationEnabled": "Autopilot enabled",
+    "automationDisabled": "Autopilot disabled",
+    "tokenRequired": "Token must be valid to enable Autopilot",
     "disconnect": "Disconnect",
     "disconnectDesc": "This action will disconnect your account from our platform and suspend all automations.",
+    "settings": "Settings",
     "disconnectSuccess": "SoundCloud disconnection successful",
     "disconnectError": "Error disconnecting SoundCloud",
     "welcomeTitle": "Welcome to your Dashboard",
@@ -76,7 +78,8 @@
     "title": "SoundCloud Configuration",
     "loading": "Loading...",
     "notConnectedWarning": "⚠️ You must be connected to SoundCloud to configure your settings.",
-    "notConnectedDesc": "Connect from the Dashboard page to enable all features.",
+    "notConnectedDesc": "Log in from the Dashboard page to enable all features.",
+    "enableAutopilotFirst": "Autopilot is disabled. Please enable it on the dashboard to configure these features.",
     "goToDashboard": "Go to Dashboard",
     "automations": "Automations",
     "engageQualifiedFanbase": "Engage with a qualified fanbase",
@@ -126,62 +129,63 @@
     "cta": "Get started today"
   },
   "music": {
-    "tagline": "SoundCloud Management Tool",
-    "title": "Manage your\nSoundCloud accounts in one click",
-    "description": "A private dashboard allowing labels and artists to connect their SoundCloud accounts, view analytics, schedule publications and manage multiple profiles from a centralized interface.",
-    "cta": "Connect Soundcloud",
+    "title": "Boost your\nmusic career",
+    "tagline": "For independent artists & labels",
+    "description": "The all-in-one platform to manage your socials, engage a qualified audience, and automate your growth.",
+    "cta": "Start now",
+    "ctaSub": "Free during Beta",
     "learnMore": "Learn more",
-    "sectionTitle": "SoundCloud Label Manager: your management tool",
-    "sectionDescription": "An internal tool developed by Kaitos to help music labels and artists efficiently manage their multiple SoundCloud accounts with automation, analytics and optimized workflows.",
-    "forLabels": {
-      "title": "For music labels",
-      "description": "Simplify the management of your multiple SoundCloud accounts from a single interface. Centralize your operations, automate your workflows and optimize your presence on the platform.",
-      "items": [
-        "Centralized management of multiple accounts",
-        "Automated publication workflow",
-        "Detailed analytics and consolidated reports",
-        "Upload scheduling"
-      ]
-    },
-    "forArtists": {
-      "title": "For artists",
-      "description": "Efficiently manage your SoundCloud presence with professional tools. Track your performance, schedule your releases and optimize your content strategy.",
-      "items": [
-        "Secure account connection",
-        "Real-time analytics visualization",
-        "Publication scheduling",
-        "Simplified multi-profile management"
-      ]
+    "sectionTitle": "A complete ecosystem",
+    "sectionDescription": "Connect your platforms, manage your presence, and grow your fanbase from a single interface.",
+    "hero": {
+      "badge": "Beta Phase - Free Access"
     },
     "features": {
-      "title": "Key features",
-      "description": "Our tool offers all the features needed for professional management of your SoundCloud accounts, with automation and advanced insights.",
+      "title": "Key Features",
+      "description": "Powerful tools designed for artists and labels.",
+      "centralization": {
+        "title": "Centralized Management",
+        "description": "No more multiple tabs. Find SoundCloud, and soon Spotify, YouTube, TikTok, and Bandcamp in one place."
+      },
+      "targeting": {
+        "title": "Smart Targeting",
+        "description": "Our algorithm filters bots and unwanted users to connect you only with listeners and artists matching your style."
+      },
       "automation": {
-        "title": "Automation",
-        "description": "Automate your publication and content management workflows. Schedule your uploads, manage your metadata and optimize your repetitive processes."
+        "title": "Automation (Autopilot)",
+        "description": "Let our autopilot work for you. Interact with your community 24/7 without lifting a finger."
       },
-      "analytics": {
-        "title": "Analytics & Insights",
-        "description": "Access detailed and consolidated analytics for all your accounts. Visualize your performance, identify trends and make informed decisions."
-      },
-      "workflow": {
-        "title": "Publication workflow",
-        "description": "Plan and schedule your publications with an optimized workflow. Manage your metadata, tags and descriptions from a centralized interface."
-      },
-      "multiAccount": {
-        "title": "Multi-account management",
-        "description": "Connect and manage multiple SoundCloud accounts from a single dashboard. Easily switch between your different profiles and centralize your operations."
+      "labels": {
+        "title": "Multi-Accounts & Labels",
+        "description": "Coming soon: Manage multiple artists and profiles from a single master account. Ideal for labels and managers."
       }
     },
-    "about": {
-      "title": "A tool in development",
-      "paragraph1": "SoundCloud Label Manager is currently in prototype phase. This tool is developed internally by Kaitos for our partner clients in the music industry.",
-      "paragraph2": "The application is not public and will only be used internally by labels and artists we work with directly. We are developing this tool to meet specific needs for managing multiple SoundCloud accounts.",
-      "paragraph3": "SoundCloud API Access: We have requested access to SoundCloud's closed API to develop the advanced features needed for this tool, including OAuth authentication and extended account management endpoints."
+    "platforms": {
+      "title": "Your favorite platforms",
+      "subtitle": "We are constantly adding new integrations.",
+      "operational": "Operational",
+      "comingSoon": "Coming Soon",
+      "distribution": "Distribution (Coming Soon)"
+    },
+    "pricing": {
+      "title": "Free Access",
+      "description": "During the entire Beta phase, access to Kaitos Music is completely free.",
+      "list": [
+        "Unlimited SoundCloud Connection",
+        "Advanced Engagement Tools",
+        "Priority Support",
+        "Early Access to New Features"
+      ]
     },
     "ctaSection": {
-      "title": "Interested in this tool?",
-      "description": "If you are a label or artist working with Kaitos and would like to learn more about this tool or request access, contact us for more information."
+      "title": "Ready for takeoff?",
+      "description": "Join the artists already using Kaitos to grow their audience."
+    },
+    "about": {
+      "title": "About Kaitos Music",
+      "paragraph1": "Kaitos Music was born from a simple need: to allow independent artists and labels to regain control over their digital presence.",
+      "paragraph2": "Our mission is to provide professional-grade tools, accessible to all, to simplify music career management.",
+      "paragraph3": "Project Status: Public Beta"
     }
   },
   "navigation": {

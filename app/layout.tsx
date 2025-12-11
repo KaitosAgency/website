@@ -67,12 +67,12 @@ export default function RootLayout({
           type="font/otf"
           crossOrigin="anonymous"
         />
-        
+
         {/* AFFILIATION */}
         <meta name='impact-site-verification' content='ee81c0a9-02d6-41d8-b0f6-7f2b1b3e50de' />
-        
+
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans !p-0`}>
         <Toaster>
           <I18nProvider>
             <AuthProvider>

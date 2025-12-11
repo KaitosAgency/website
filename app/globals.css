@@ -7,7 +7,6 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: 'Outfit', var(--font-outfit), sans-serif;
-  scrollbar-gutter: stable;
 }
 
 body {
@@ -19,12 +18,36 @@ p {
   font-family: 'Outfit', var(--font-outfit), sans-serif;
 }
 
-li, span, a, div, input, textarea, button, label, strong, em, u, small, code, pre, blockquote, th, td, tr, table, ul, ol, dl, dt, dd {
+li,
+span,
+a,
+div,
+input,
+textarea,
+button,
+label,
+strong,
+em,
+u,
+small,
+code,
+pre,
+blockquote,
+th,
+td,
+tr,
+table,
+ul,
+ol,
+dl,
+dt,
+dd {
   font-family: 'Outfit', var(--font-outfit), sans-serif;
   font-weight: 300;
 }
 
-b, strong {
+b,
+strong {
   font-family: 'Outfit', var(--font-outfit), sans-serif;
   font-weight: 600;
 }
@@ -175,7 +198,12 @@ a {
   font-display: swap;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
@@ -193,7 +221,9 @@ h2 {
   overflow-wrap: break-word;
 }
 
-h1 span, h2 span, h3 span {
+h1 span,
+h2 span,
+h3 span {
   font-weight: inherit;
 }
 
@@ -201,19 +231,20 @@ h3 {
   font-weight: 600;
 }
 
-h4, h5, h6 {
+h4,
+h5,
+h6 {
   font-weight: 600;
 }
 
 .gradient-title {
   background: linear-gradient(83deg,
-    rgba(145, 151, 163, 1) 1.68%,
-    rgba(245, 248, 255, 1) 24.02%,
-    rgba(238, 241, 249, 1) 47.77%,
-    rgba(217, 221, 230, 1) 54.47%,
-    rgba(245, 248, 255, 1) 60.89%,
-    rgba(174, 179, 189, 1) 100%
-  );
+      rgba(145, 151, 163, 1) 1.68%,
+      rgba(245, 248, 255, 1) 24.02%,
+      rgba(238, 241, 249, 1) 47.77%,
+      rgba(217, 221, 230, 1) 54.47%,
+      rgba(245, 248, 255, 1) 60.89%,
+      rgba(174, 179, 189, 1) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -224,10 +255,16 @@ h4, h5, h6 {
 
 /* Force Aileron pour tous les titres sur mobile */
 @media (max-width: 768px) {
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
-  
+
   .gradient-title {
     font-family: 'Aileron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
@@ -241,7 +278,13 @@ h4, h5, h6 {
 
 /* Fallback pour éviter le FOUT (Flash of Unstyled Text) */
 @supports (font-display: swap) {
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-display: swap;
   }
 }
@@ -254,9 +297,11 @@ h4, h5, h6 {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 14 89% 59%; /* #F05C39 en HSL, couleur corrigée */
+    --primary: 14 89% 59%;
+    /* #F05C39 en HSL, couleur corrigée */
     --primary-foreground: 0 0% 98%;
-    --secondary: 220 26% 15%; /* #1C1E26 en HSV (R28 V30 B38) */
+    --secondary: 220 26% 15%;
+    /* #1C1E26 en HSV (R28 V30 B38) */
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
@@ -273,8 +318,10 @@ h4, h5, h6 {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --offwhite: 223 6% 100%; /* #F5F8FF en HSV */
+    --offwhite: 223 6% 100%;
+    /* #F5F8FF en HSV */
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -309,6 +356,7 @@ h4, h5, h6 {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -316,9 +364,9 @@ h4, h5, h6 {
 
 /* Styles pour les liens dans LayoutPage */
 .layout-page-prose a {
-  font-weight:400
+  font-weight: 400
 }
 
 .layout-page-prose a:hover {
-  opacity:0.8
+  opacity: 0.8
 }

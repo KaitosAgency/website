@@ -26,6 +26,7 @@
     "dashboard": "Tableau de bord",
     "soundcloud": "SoundCloud",
     "spotify": "Spotify",
+    "bandcamp": "Bandcamp",
     "youtube": "YouTube",
     "tiktok": "TikTok",
     "comingSoon": "Bientôt",
@@ -59,13 +60,14 @@
     "tokenValid": "Token valide - Connexion active",
     "account": "Compte",
     "reauthenticate": "Se réauthentifier avec SoundCloud",
-    "automation": "Automation",
-    "automationDesc": "Activez l'automatisation pour votre compte SoundCloud",
-    "automationEnabled": "Automation activée",
-    "automationDisabled": "Automation désactivée",
-    "tokenRequired": "Le token doit être valide pour activer l'automation",
+    "automation": "Autopilot",
+    "automationDesc": "Activez l'Autopilot pour votre compte SoundCloud",
+    "automationEnabled": "Autopilot activé",
+    "automationDisabled": "Autopilot désactivé",
+    "tokenRequired": "Le token doit être valide pour activer l'Autopilot",
     "disconnect": "Déconnexion",
     "disconnectDesc": "Cette action déconnecte votre compte de notre plateforme et suspendra toutes les automations.",
+    "settings": "Paramètres",
     "disconnectSuccess": "Déconnexion SoundCloud réussie",
     "disconnectError": "Erreur lors de la déconnexion SoundCloud",
     "welcomeTitle": "Bienvenue sur votre Tableau de bord",
@@ -77,6 +79,7 @@
     "loading": "Chargement...",
     "notConnectedWarning": "⚠️ Vous devez être connecté à SoundCloud pour configurer vos paramètres.",
     "notConnectedDesc": "Connectez-vous depuis la page Tableau de bord pour activer toutes les fonctionnalités.",
+    "enableAutopilotFirst": "L'Autopilot est désactivé. Veuillez l'activer sur le tableau de bord pour configurer ces fonctionnalités.",
     "goToDashboard": "Aller au Tableau de bord",
     "automations": "Automations",
     "engageQualifiedFanbase": "Engagez avec une fan base qualifiée",
@@ -126,62 +129,63 @@
     "cta": "Commencer aujourd'hui"
   },
   "music": {
-    "tagline": "Outil de gestion SoundCloud",
-    "title": "Gérez vos comptes\nSoundCloud en un clic",
-    "description": "Un dashboard privé permettant aux labels et artistes de connecter leurs comptes SoundCloud, visualiser les analytics, planifier les publications et gérer plusieurs profils depuis une interface centralisée.",
-    "cta": "Connexion Soundcloud",
+    "title": "Boostez votre\ncarrière musicale",
+    "tagline": "Pour artistes indépendants & labels",
+    "description": "La plateforme tout-en-un pour gérer vos réseaux, engager une audience qualifiée et automatiser votre croissance.",
+    "cta": "Démarrer maintenant",
+    "ctaSub": "Gratuit pendant la Beta",
     "learnMore": "En savoir plus",
-    "sectionTitle": "SoundCloud Label Manager : votre outil de gestion",
-    "sectionDescription": "Un outil interne développé par Kaitos pour aider les labels musicaux et les artistes à gérer efficacement leurs multiples comptes SoundCloud avec automatisation, analytics et workflows optimisés.",
-    "forLabels": {
-      "title": "Pour les labels musicaux",
-      "description": "Simplifiez la gestion de vos multiples comptes SoundCloud depuis une interface unique. Centralisez vos opérations, automatisez vos workflows et optimisez votre présence sur la plateforme.",
-      "items": [
-        "Gestion centralisée de plusieurs comptes",
-        "Workflow de publication automatisé",
-        "Analytics détaillés et rapports consolidés",
-        "Planification des uploads"
-      ]
-    },
-    "forArtists": {
-      "title": "Pour les artistes",
-      "description": "Gérez efficacement votre présence SoundCloud avec des outils professionnels. Suivez vos performances, planifiez vos sorties et optimisez votre stratégie de contenu.",
-      "items": [
-        "Connexion sécurisée de votre compte",
-        "Visualisation des analytics en temps réel",
-        "Planification des publications",
-        "Gestion multi-profils simplifiée"
-      ]
+    "sectionTitle": "Un écosystème complet",
+    "sectionDescription": "Connectez vos plateformes, gérez votre présence et développez votre fanbase depuis une interface unique.",
+    "hero": {
+      "badge": "Phase Beta - Accès Gratuit"
     },
     "features": {
-      "title": "Fonctionnalités clés",
-      "description": "Notre outil offre toutes les fonctionnalités nécessaires pour une gestion professionnelle de vos comptes SoundCloud, avec automatisation et insights avancés.",
+      "title": "Fonctionnalités Clés",
+      "description": "Des outils puissants conçus pour les artistes et les labels.",
+      "centralization": {
+        "title": "Gestion Centralisée",
+        "description": "Finis les onglets multiples. Retrouvez SoundCloud, et bientôt Spotify, YouTube, TikTok et Bandcamp au même endroit."
+      },
+      "targeting": {
+        "title": "Ciblage Intelligent",
+        "description": "Notre algorithme filtre les bots et les indésirables pour vous connecter uniquement avec des auditeurs et artistes qui correspondent à votre style."
+      },
       "automation": {
-        "title": "Automatisation",
-        "description": "Automatisez vos workflows de publication et de gestion de contenu. Planifiez vos uploads, gérez vos métadonnées et optimisez vos processus répétitifs."
+        "title": "Automatisation (Autopilot)",
+        "description": "Laissez notre autopilote travailler pour vous. Interagissez avec votre communauté 24/7 sans lever le petit doigt."
       },
-      "analytics": {
-        "title": "Analytics & Insights",
-        "description": "Accédez à des analytics détaillés et consolidés pour tous vos comptes. Visualisez vos performances, identifiez les tendances et prenez des décisions éclairées."
-      },
-      "workflow": {
-        "title": "Workflow de publication",
-        "description": "Planifiez et programmez vos publications avec un workflow optimisé. Gérez vos métadonnées, vos tags et vos descriptions depuis une interface centralisée."
-      },
-      "multiAccount": {
-        "title": "Gestion multi-comptes",
-        "description": "Connectez et gérez plusieurs comptes SoundCloud depuis un seul dashboard. Basculez facilement entre vos différents profils et centralisez vos opérations."
+      "labels": {
+        "title": "Multi-Comptes & Labels",
+        "description": "Fonctionnalité à venir : Gérez plusieurs artistes et profils depuis un seul compte maître. Idéal pour les labels et managers."
       }
     },
-    "about": {
-      "title": "Un outil en développement",
-      "paragraph1": "SoundCloud Label Manager est actuellement en phase de prototype. Cet outil est développé en interne par Kaitos pour nos clients partenaires dans l'industrie musicale.",
-      "paragraph2": "L'application n'est pas publique et sera uniquement utilisée en interne par les labels et artistes avec lesquels nous travaillons directement. Nous développons cet outil pour répondre aux besoins spécifiques de gestion de comptes SoundCloud multiples.",
-      "paragraph3": "Accès à l'API SoundCloud : Nous avons demandé l'accès à l'API fermée de SoundCloud pour pouvoir développer les fonctionnalités avancées nécessaires à cet outil, notamment l'authentification OAuth et les endpoints de gestion de compte étendus."
+    "platforms": {
+      "title": "Vos plateformes préférées",
+      "subtitle": "Nous ajoutons constamment de nouvelles intégrations.",
+      "operational": "Opérationnel",
+      "comingSoon": "Bientôt",
+      "distribution": "Distribution (Bientôt)"
+    },
+    "pricing": {
+      "title": "Accès Gratuit",
+      "description": "Pendant toute la durée de la phase Beta, l'accès à Kaitos Music est entièrement gratuit.",
+      "list": [
+        "Connexion SoundCloud illimitée",
+        "Outils d'engagement avancés",
+        "Support prioritaire",
+        "Accès en avant-première aux nouveautés"
+      ]
     },
     "ctaSection": {
-      "title": "Intéressé par cet outil ?",
-      "description": "Si vous êtes un label ou un artiste travaillant avec Kaitos et que vous souhaitez en savoir plus sur cet outil ou demander l'accès, contactez-nous pour plus d'informations."
+      "title": "Prêt à décoller ?",
+      "description": "Rejoignez les artistes qui utilisent déjà Kaitos pour développer leur audience."
+    },
+    "about": {
+      "title": "À propos de Kaitos Music",
+      "paragraph1": "Kaitos Music est né d'un besoin simple : permettre aux artistes indépendants et aux labels de reprendre le contrôle sur leur présence numérique.",
+      "paragraph2": "Notre mission est de fournir des outils de qualité professionnelle, accessibles à tous, pour démocratiser la gestion de carrière musicale.",
+      "paragraph3": "Status du projet : Beta publique"
     }
   },
   "navigation": {

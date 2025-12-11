@@ -42,6 +42,7 @@ export default function SoundCloudConfigPage() {
     loadConfig,
     updateConfig,
     soundcloudUser,
+    automation,
   } = useSoundCloud();
 
   const [savingStyles, setSavingStyles] = useState(false);
@@ -331,18 +332,37 @@ export default function SoundCloudConfigPage() {
                     {t('soundcloudPage.notConnectedDesc')}
                   </p>
                 </div>
-                <Button
-                  onClick={() => router.push('/music/dashboard')}
-                  variant="default"
-                >
-                  {t('soundcloudPage.goToDashboard')}
-                </Button>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/music/dashboard')}
+                className="mt-4"
+              >
+                {t('soundcloudPage.goToDashboard')}
+              </Button>
             </CardContent>
           </Card>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Colonne de gauche - Automations */}
+
+        {/* Warning Autopilot Disabled */}
+        {isSoundCloudConnected && automation === false && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-center">
+            <p className="text-amber-800 font-medium mb-2">
+              ⚠️ {t('soundcloudPage.enableAutopilotFirst')}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/music/dashboard')}
+              className="bg-white hover:bg-amber-50 border-amber-300 text-amber-900"
+            >
+              {t('soundcloudPage.goToDashboard')}
+            </Button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Colonne de gauche - Automations et Commentaires */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -366,7 +386,7 @@ export default function SoundCloudConfigPage() {
                     id="follow-unfollow-toggle"
                     checked={followUnfollow}
                     onCheckedChange={handleFollowUnfollowToggle}
-                    disabled={followUnfollowLoading || !isSoundCloudConnected}
+                    disabled={followUnfollowLoading || !isSoundCloudConnected || !automation}
                   />
                 </div>
 
@@ -385,7 +405,7 @@ export default function SoundCloudConfigPage() {
                     id="auto-repost-toggle"
                     checked={autoRepost}
                     onCheckedChange={handleAutoRepostToggle}
-                    disabled={autoRepostLoading || !isSoundCloudConnected}
+                    disabled={autoRepostLoading || !isSoundCloudConnected || !automation}
                   />
                 </div>
 
@@ -404,7 +424,7 @@ export default function SoundCloudConfigPage() {
                     id="engage-with-artists-toggle"
                     checked={engageWithArtists}
                     onCheckedChange={handleEngageWithArtistsToggle}
-                    disabled={engageWithArtistsLoading || !isSoundCloudConnected}
+                    disabled={engageWithArtistsLoading || !isSoundCloudConnected || !automation}
                   />
                 </div>
               </CardContent>
@@ -435,11 +455,11 @@ export default function SoundCloudConfigPage() {
                         }
                       }}
                       className="flex-1"
-                      disabled={savingComments || !isSoundCloudConnected}
+                      disabled={savingComments || !isSoundCloudConnected || !automation}
                     />
                     <Button
                       onClick={handleAddComment}
-                      disabled={savingComments || !newComment.trim() || !isSoundCloudConnected}
+                      disabled={savingComments || !newComment.trim() || !isSoundCloudConnected || !automation}
                     >
                       {savingComments ? t('soundcloudPage.adding') : t('soundcloudPage.add')}
                     </Button>
@@ -471,7 +491,7 @@ export default function SoundCloudConfigPage() {
                             onClick={() => handleRemoveComment(comment)}
                             className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
                             aria-label={`${t('soundcloudPage.remove')} ${comment}`}
-                            disabled={savingComments || !isSoundCloudConnected}
+                            disabled={savingComments || !isSoundCloudConnected || !automation}
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -506,7 +526,7 @@ export default function SoundCloudConfigPage() {
                     onChange={handleInputChange}
                     onKeyDown={handleInputKeyDown}
                     className="w-full"
-                    disabled={styles.length >= 3 || !isSoundCloudConnected}
+                    disabled={styles.length >= 3 || !isSoundCloudConnected || !automation}
                   />
                   {styles.length >= 3 && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -529,7 +549,7 @@ export default function SoundCloudConfigPage() {
                           onClick={() => removeStyle(index)}
                           className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
                           aria-label={`${t('soundcloudPage.remove')} ${style}`}
-                          disabled={!isSoundCloudConnected}
+                          disabled={!isSoundCloudConnected || !automation}
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -548,7 +568,7 @@ export default function SoundCloudConfigPage() {
                   <Button
                     variant="default"
                     onClick={handleSaveStyles}
-                    disabled={savingStyles || styles.length === 0 || styles.length > 3 || !isSoundCloudConnected}
+                    disabled={savingStyles || styles.length === 0 || styles.length > 3 || !isSoundCloudConnected || !automation}
                   >
                     {savingStyles ? t('soundcloudPage.saving') : t('common.save')}
                   </Button>
@@ -593,7 +613,7 @@ export default function SoundCloudConfigPage() {
                       setMaxFollowings(value === '' ? null : parseInt(value, 10));
                     }}
                     className="w-full"
-                    disabled={!isSoundCloudConnected}
+                    disabled={!isSoundCloudConnected || !automation}
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     {t('soundcloudPage.maxFollowingDesc')}
@@ -609,7 +629,7 @@ export default function SoundCloudConfigPage() {
                   <Button
                     variant="default"
                     onClick={handleSaveMaxFollowings}
-                    disabled={savingMaxFollowings || !isSoundCloudConnected}
+                    disabled={savingMaxFollowings || !isSoundCloudConnected || !automation}
                   >
                     {savingMaxFollowings ? t('soundcloudPage.saving') : t('common.save')}
                   </Button>

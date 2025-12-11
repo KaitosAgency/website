@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const supabase = createClient();
-      
+
       // Vérifier d'abord que l'utilisateur est bien authentifié
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
       if (authError || !authUser || authUser.id !== userIdToCheck) {
@@ -108,27 +108,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authError || !authUser) {
         setUser(null);
         setIsAdmin(null);
-      // Sauvegarder dans le cache
-      try {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(CACHE_USER_KEY, JSON.stringify({
-            data: null,
-            lastLoaded: Date.now(),
-          }));
+        // Sauvegarder dans le cache
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(CACHE_USER_KEY, JSON.stringify({
+              data: null,
+              lastLoaded: Date.now(),
+            }));
+          }
+        } catch (err) {
+          console.error('Erreur lors de la sauvegarde du cache:', err);
         }
-      } catch (err) {
-        console.error('Erreur lors de la sauvegarde du cache:', err);
-      }
-        
+
         if (redirect) {
-          router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
+          // Utiliser replace au lieu de push pour éviter la boucle lors du retour en arrière
+          router.replace(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
         }
         setLoading(false);
         return false;
       }
 
       setUser(authUser);
-      
+
       // Sauvegarder dans le cache
       try {
         if (typeof window !== 'undefined') {
@@ -141,8 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Erreur lors de la sauvegarde du cache:', err);
       }
 
-        // Vérifier le statut admin après avoir défini l'utilisateur
-        await refreshAdminStatus(authUser.id);
+      // Vérifier le statut admin après avoir défini l'utilisateur
+      await refreshAdminStatus(authUser.id);
 
       setLoading(false);
       return true;
@@ -173,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const cachedUser = localStorage.getItem(CACHE_USER_KEY);
         const cachedAdmin = localStorage.getItem(CACHE_ADMIN_KEY);
-        
+
         if (cachedUser) {
           const parsed = JSON.parse(cachedUser);
           const now = Date.now();
@@ -219,7 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         setUser(authUser);
-        
+
         // Sauvegarder dans le cache
         try {
           if (typeof window !== 'undefined') {

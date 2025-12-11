@@ -5,13 +5,16 @@ import { cookies } from 'next/headers';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Vérifier l'authentification Supabase
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Not authenticated' },
+        {
+          error: 'Not authenticated',
+          authFailed: true // Supabase session expired, not SoundCloud issue
+        },
         { status: 401 }
       );
     }
@@ -43,7 +46,7 @@ export async function GET() {
     // Mettre à jour le cookie pour rester synchronisé (optionnel, pour compatibilité)
     const cookieStore = await cookies();
     const response = NextResponse.json({});
-    
+
     // Mettre à jour le cookie si nécessaire
     const existingCookieToken = cookieStore.get('soundcloud_access_token')?.value;
     if (existingCookieToken !== accessToken) {
@@ -61,7 +64,7 @@ export async function GET() {
         'Authorization': `OAuth ${accessToken}`,
       },
     });
-    
+
     if (!userResponse.ok) {
       // Si le token est invalide, retourner une erreur appropriée
       if (userResponse.status === 401) {
@@ -70,7 +73,7 @@ export async function GET() {
           { status: 401 }
         );
       }
-      
+
       return NextResponse.json(
         { error: 'Failed to fetch user data' },
         { status: userResponse.status }
@@ -78,7 +81,7 @@ export async function GET() {
     }
 
     const userData = await userResponse.json();
-    
+
     // Mettre à jour le cookie avec les données utilisateur pour compatibilité
     response.cookies.set('soundcloud_user', JSON.stringify({
       id: userData.id,

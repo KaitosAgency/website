@@ -18,6 +18,7 @@ export default function MusicDashboard() {
   const {
     showSkeleton,
     error,
+    isCheckingAuth,
     isSoundCloudConnected,
     router,
   } = useDashboardAuth({ redirectUrl: '/music/dashboard' });
@@ -108,17 +109,26 @@ export default function MusicDashboard() {
     router.push('/music/dashboard/soundcloud');
   };
 
+  // Ne rien afficher pendant la vérification de l'auth ou redirection (évite le flash)
+  const isAuthError = error?.toLowerCase().includes('auth');
+  if (isCheckingAuth || isAuthError) {
+    return null;
+  }
+
   // État de chargement
   if (showSkeleton) {
     return (
       <Dashboard title={t('dashboard.title')}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <PlatformProfileCardSkeleton />
+          <PlatformProfileCardSkeleton />
+          <PlatformProfileCardSkeleton />
         </div>
       </Dashboard>
     );
   }
 
+  // Autres erreurs (pas l'auth)
   if (error) {
     return (
       <Dashboard title={t('dashboard.title')}>
@@ -202,6 +212,7 @@ export default function MusicDashboard() {
               reauthenticate: t('dashboard.reauthenticate'),
               disconnect: t('dashboard.disconnect'),
               disconnectDesc: t('dashboard.disconnectDesc'),
+              settings: t('dashboard.settings'),
               plan: t('dashboard.plan'),
               tokenValid: t('dashboard.tokenValid'),
               account: t('dashboard.account'),
@@ -249,17 +260,42 @@ export default function MusicDashboard() {
               background: 'linear-gradient(135deg, #1DB954 0%, #1a1a2e 100%)',
             }}
           >
-            <div className="absolute top-3 left-3 flex items-center gap-2">
+            <div className="absolute top-4 left-4 flex items-center gap-2">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
               </svg>
               <span className="text-white/90 text-sm font-medium">Spotify</span>
             </div>
-            <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+            <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
               {t('common.comingSoon')}
             </div>
           </div>
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-gray-500">
+              {t('dashboard.platformComingSoon')}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Placeholder pour futures plateformes - Bandcamp */}
+        <Card className="overflow-hidden w-full max-w-md opacity-60">
+          <div
+            className="relative h-24"
+            style={{
+              background: 'linear-gradient(135deg, #629aa9 0%, #1a1a2e 100%)',
+            }}
+          >
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
+                <path d="M0 18.75l7.437-13.5h16.563l-7.437 13.5h-16.563z" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">Bandcamp</span>
+            </div>
+            <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+              {t('common.comingSoon')}
+            </div>
+          </div>
+          <CardContent className="p-4 text-center">
             <p className="text-sm text-gray-500">
               {t('dashboard.platformComingSoon')}
             </p>
@@ -274,17 +310,42 @@ export default function MusicDashboard() {
               background: 'linear-gradient(135deg, #FF0000 0%, #1a1a2e 100%)',
             }}
           >
-            <div className="absolute top-3 left-3 flex items-center gap-2">
+            <div className="absolute top-4 left-4 flex items-center gap-2">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
               </svg>
               <span className="text-white/90 text-sm font-medium">YouTube</span>
             </div>
-            <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+            <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
               {t('common.comingSoon')}
             </div>
           </div>
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-gray-500">
+              {t('dashboard.platformComingSoon')}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Placeholder pour futures plateformes - TikTok */}
+        <Card className="overflow-hidden w-full max-w-md opacity-60">
+          <div
+            className="relative h-24"
+            style={{
+              background: 'linear-gradient(135deg, #000000 0%, #1a1a2e 100%)',
+            }}
+          >
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white/90" fill="currentColor">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">TikTok</span>
+            </div>
+            <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white/80">
+              {t('common.comingSoon')}
+            </div>
+          </div>
+          <CardContent className="p-4 text-center">
             <p className="text-sm text-gray-500">
               {t('dashboard.platformComingSoon')}
             </p>

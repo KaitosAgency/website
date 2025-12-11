@@ -8,10 +8,14 @@ interface Translations {
   [key: string]: any
 }
 
+interface TranslationOptions {
+  returnObjects?: boolean
+}
+
 interface I18nContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, options?: TranslationOptions) => any
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
@@ -40,7 +44,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang
   }
 
-  const t = (key: string): string => {
+  const t = (key: string, options?: TranslationOptions): any => {
     const keys = key.split(".")
     let value: any = translations[language]
 
@@ -59,6 +63,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         }
         break
       }
+    }
+
+    if (options?.returnObjects) {
+      return value
     }
 
     return typeof value === "string" ? value : key

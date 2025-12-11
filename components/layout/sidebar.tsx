@@ -38,6 +38,12 @@ const TiktokIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
+const BandcampIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M0 18.75l7.437-13.5h16.563l-7.437 13.5h-16.563z" />
+  </svg>
+)
+
 interface SidebarItem {
   translationKey: string
   href: string
@@ -50,6 +56,7 @@ const sidebarItems: SidebarItem[] = [
   { translationKey: 'sidebar.dashboard', href: '/music/dashboard', icon: LayoutDashboard },
   { translationKey: 'sidebar.soundcloud', href: '/music/dashboard/soundcloud', icon: Music },
   { translationKey: 'sidebar.spotify', href: '#', icon: SpotifyIcon, disabled: true, comingSoon: true },
+  { translationKey: 'sidebar.bandcamp', href: '#', icon: BandcampIcon, disabled: true, comingSoon: true },
   { translationKey: 'sidebar.youtube', href: '#', icon: YoutubeIcon, disabled: true, comingSoon: true },
   { translationKey: 'sidebar.tiktok', href: '#', icon: TiktokIcon, disabled: true, comingSoon: true },
 ]
@@ -72,10 +79,24 @@ export function Sidebar() {
   const { t } = useI18n()
 
   const handleLogout = async () => {
+    // Nettoyer tous les caches locaux
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('soundcloud_token_status');
+        localStorage.removeItem('soundcloud_user_data');
+        localStorage.removeItem('soundcloud_config_data');
+        localStorage.removeItem('soundcloud_automation');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_is_admin');
+        sessionStorage.removeItem('session_data_loaded');
+      } catch {
+        // Ignorer les erreurs de nettoyage
+      }
+    }
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    // Forcer un rechargement complet pour réinitialiser tous les états React
+    window.location.href = '/'
   }
 
   return (

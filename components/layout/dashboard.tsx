@@ -72,8 +72,8 @@ export function Dashboard({ title, children, headerActions }: DashboardProps) {
                         setIsLangMenuOpen(false)
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${language === lang.code
-                          ? 'bg-gray-100 text-gray-900 font-medium'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-gray-100 text-gray-900 font-medium'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                     >
                       <span className="text-lg">{lang.flag}</span>

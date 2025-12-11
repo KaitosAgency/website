@@ -19,6 +19,8 @@ interface UseDashboardAuthReturn {
     showSkeleton: boolean;
     /** Affiche l'état de chargement simple (texte) */
     showLoading: boolean;
+    /** En cours de vérification de l'auth (ne rien afficher) */
+    isCheckingAuth: boolean;
     /** Erreur d'authentification */
     error: string | null;
     /** L'utilisateur est connecté à SoundCloud */
@@ -63,18 +65,32 @@ export function useDashboardAuth(options: UseDashboardAuthOptions = {}): UseDash
         loadingUser,
         config,
         initialLoadComplete,
+        loadSoundCloudUser,
+        loadConfig,
+        loadAutomation,
     } = useSoundCloud();
 
     const { user, loading: authLoading, checkAuth } = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const hasCheckedAuth = useRef(false);
+    // Si l'utilisateur est déjà connu, pas besoin de vérifier l'auth
+    const [authCheckComplete, setAuthCheckComplete] = useState(user !== null);
+    const authCheckStarted = useRef(user !== null);
+    const hasLoadedSoundCloudData = useRef(false);
 
     // Vérifier l'authentification seulement une fois au montage initial
+    // ET seulement si on n'a pas déjà un user dans le contexte
     useEffect(() => {
-        if (!hasCheckedAuth.current) {
-            hasCheckedAuth.current = true;
+        // Si l'utilisateur est déjà authentifié, pas besoin de vérifier
+        if (user) {
+            setAuthCheckComplete(true);
+            setLoading(false);
+            return;
+        }
+
+        if (!authCheckStarted.current) {
+            authCheckStarted.current = true;
             const url = redirectUrl || (typeof window !== 'undefined' ? window.location.pathname : '/');
             checkAuth(url).then((isAuthenticated) => {
                 if (isAuthenticated) {
@@ -83,9 +99,25 @@ export function useDashboardAuth(options: UseDashboardAuthOptions = {}): UseDash
                     setError('Non authentifié');
                     setLoading(false);
                 }
+                setAuthCheckComplete(true);
             });
         }
-    }, [checkAuth, redirectUrl]);
+    }, [checkAuth, redirectUrl, user]);
+
+    // Charger les données SoundCloud quand l'utilisateur Supabase devient disponible
+    // Cela corrige le cas où le préchargement a été fait avant que l'auth soit prête
+    useEffect(() => {
+        if (user && !authLoading && !soundcloudUser && !loadingUser && !hasLoadedSoundCloudData.current) {
+            hasLoadedSoundCloudData.current = true;
+            Promise.all([
+                loadSoundCloudUser(false),
+                loadConfig(false),
+                loadAutomation(false),
+            ]).catch(() => {
+                // Silently ignore errors - they are handled in individual loaders
+            });
+        }
+    }, [user, authLoading, soundcloudUser, loadingUser, loadSoundCloudUser, loadConfig, loadAutomation]);
 
     // Attendre que le préchargement soit terminé
     useEffect(() => {
@@ -101,21 +133,25 @@ export function useDashboardAuth(options: UseDashboardAuthOptions = {}): UseDash
     const isSoundCloudConnected = soundcloudUser !== null;
 
     // Déterminer si on doit afficher le skeleton
-    // IMPORTANT: Si on a des données en cache, ne pas afficher le skeleton
-    const isInitialLoading = !hasCachedData && (loading || !initialLoadComplete || authLoading);
+    const isInitialLoading = !initialLoadComplete || authLoading;
     const isUserLoading = loadingUser && !soundcloudUser;
-    const showSkeleton = isInitialLoading || isUserLoading;
+    const isWaitingForDataLoad = !!(user && !authLoading && !soundcloudUser && !loadingUser && !hasLoadedSoundCloudData.current);
+    const showSkeleton = (!hasCachedData && isInitialLoading) || isUserLoading || isWaitingForDataLoad;
 
     // Afficher le loading simple (texte) si pas de données en cache
     const showLoading = !hasCachedData && loading;
 
     // L'utilisateur est prêt (authentifié et données chargées)
-    const isReady = !showSkeleton && !error && user !== null;
+    const isReady = !showSkeleton && !error && user !== null && initialLoadComplete;
+
+    // En cours de vérification de l'auth (ne rien afficher pour éviter le flash)
+    const isCheckingAuth = !authCheckComplete || authLoading;
 
     return {
         isReady,
         showSkeleton,
         showLoading,
+        isCheckingAuth,
         error,
         isSoundCloudConnected,
         hasCachedData,
