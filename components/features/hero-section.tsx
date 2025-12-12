@@ -14,8 +14,10 @@ interface HeroSectionProps {
   ctaHref?: string;
   ctaOnClick?: () => void;
   showStars?: boolean;
-  overlayIntensity?: "light" | "medium" | "strong";
+  showBottomGradient?: boolean;
+  bottomOffset?: number; // Pourcentage depuis le bas (ex: 10 = 10%)
   className?: string;
+  children?: ReactNode;
 }
 
 export function HeroSection({
@@ -28,28 +30,13 @@ export function HeroSection({
   ctaHref,
   ctaOnClick,
   showStars = true,
-  overlayIntensity = "medium",
+  showBottomGradient = true,
+  bottomOffset = 5,
   className = "",
+  children,
 }: HeroSectionProps) {
-  const overlayClasses = {
-    light: {
-      top: "from-secondary/20 from-20% via-transparent via-50%",
-      bottom: "from-secondary/30 via-secondary/20 via-25%",
-    },
-    medium: {
-      top: "from-secondary from-30% via-transparent via-55%",
-      bottom: "from-secondary via-secondary via-30%",
-    },
-    strong: {
-      top: "from-secondary from-40% via-secondary/50 via-60%",
-      bottom: "from-secondary via-secondary via-40%",
-    },
-  };
-
-  const overlay = overlayClasses[overlayIntensity];
-
   return (
-    <section className={`relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-secondary px-4 ${className}`}>
+    <section className={`relative w-full min-h-screen flex items-end overflow-hidden bg-secondary px-4 ${className}`}>
       {/* Image de fond */}
       <div className="absolute inset-0 w-full h-full">
         <Image
@@ -58,18 +45,27 @@ export function HeroSection({
           fill
           className="object-cover w-full h-full"
           priority
-          quality={95}
+          quality={100}
           sizes="100vw"
+          unoptimized
         />
       </div>
 
-      {/* Overlay dégradé secondary en haut - même couleur que la barre de menu */}
-      <div className="absolute top-0 left-0 right-0 h-[160px] bg-gradient-to-b from-secondary via-secondary to-transparent z-5"></div>
+      {/* Overlay dégradé en haut - unifié pour toutes les pages */}
+      <div className="absolute top-0 left-0 right-0 h-[30%] bg-gradient-to-b from-secondary from-30% via-secondary/50 via-60% to-transparent z-5" />
+
+      {/* Overlay dégradé en bas - optionnel */}
+      {showBottomGradient && (
+        <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-secondary via-secondary via-30% to-transparent z-5" />
+      )}
 
       {/* Contenu Hero */}
-      <div className="relative z-10 flex flex-col items-center justify-end w-full h-full text-white text-center gap-6 px-4 pb-8 pt-48">
+      <div
+        className="absolute left-0 right-0 z-10 flex flex-col items-center w-full text-white text-center gap-4 px-4"
+        style={{ bottom: `${bottomOffset}%` }}
+      >
         {(showStars || tagline) && (
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 mb-[-10px]">
             {showStars && (
               <div className="flex gap-1">
                 {[...Array(5)].map((_, index) => (
@@ -101,8 +97,8 @@ export function HeroSection({
             </Button>
           </div>
         )}
+        {children}
       </div>
     </section>
   );
 }
-

@@ -1,14 +1,48 @@
 import { NextResponse } from 'next/server';
 import { chromium } from 'playwright';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
     try {
+        // 🔒 SECURITY: Verify user authentication
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
         const { bio, oauthToken } = await req.json();
 
         if (!bio || !oauthToken) {
             return NextResponse.json(
                 { error: 'Bio and OAuth token are required' },
                 { status: 400 }
+            );
+        }
+
+        // 🔒 SECURITY: Verify that the oauthToken belongs to this authenticated user
+        const { data: soundcloudUser, error: tokenError } = await supabase
+            .from('soundcloud_users')
+            .select('access_token')
+            .eq('user_id', user.id)
+            .single();
+
+        if (tokenError || !soundcloudUser) {
+            return NextResponse.json(
+                { error: 'SoundCloud account not connected' },
+                { status: 403 }
+            );
+        }
+
+        // Verify token matches
+        if (oauthToken !== soundcloudUser.access_token) {
+            return NextResponse.json(
+                { error: 'Invalid OAuth token' },
+                { status: 403 }
             );
         }
 

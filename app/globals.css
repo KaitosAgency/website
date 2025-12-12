@@ -370,3 +370,31 @@ h6 {
 .layout-page-prose a:hover {
   opacity: 0.8
 }
+
+/* Custom scrollbar styling for music dashboard */
+[data-dashboard="music"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-dashboard="music"] ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+[data-dashboard="music"] ::-webkit-scrollbar-thumb {
+  background: hsl(14, 89%, 59%);
+  /* Primary orange color */
+  border-radius: 4px;
+}
+
+[data-dashboard="music"] ::-webkit-scrollbar-thumb:hover {
+  background: hsl(14, 89%, 50%);
+  /* Darker orange on hover */
+}
+
+/* Firefox scrollbar styling */
+[data-dashboard="music"] * {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(14, 89%, 59%) #f3f4f6;
+}

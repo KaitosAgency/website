@@ -43,7 +43,7 @@ export function Dashboard({ title, children, headerActions }: DashboardProps) {
   const currentLang = languages.find(l => l.code === language) || languages[0]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" data-dashboard="music">
       <Sidebar />
 
       {/* Contenu principal */}

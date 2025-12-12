@@ -1,7 +1,7 @@
 {
   "common": {
     "siteUnderConstruction": "Site en construction",
-    "reserveCall": "Réserver un appel",
+    "reserveCall": "Contact",
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
@@ -98,9 +98,17 @@
     "saving": "Sauvegarde...",
     "noComments": "Aucun commentaire défini.",
     "enterCommentError": "Veuillez entrer un commentaire",
+    "commentTooLong": "Le commentaire ne doit pas dépasser 20 caractères",
+    "noLinksAllowed": "Les liens ne sont pas autorisés",
     "commentExists": "Ce commentaire existe déjà",
     "commentsSaved": "Commentaires sauvegardés avec succès",
-    "mustBeConnectedComments": "Vous devez être connecté à SoundCloud pour sauvegarder vos commentaires",
+    "mustBeConnectedComments": "Vous devez être connecté àSoundCloud pour sauvegarder vos commentaires",
+    "resetToDefault": "Défaut",
+    "resetConfirmTitle": "Réinitialiser aux commentaires par défaut ?",
+    "resetConfirmMessage": "Cette action remplacera tous vos commentaires actuels par les commentaires par défaut définis par l'administrateur. Vous devrez ensuite enregistrer les modifications.",
+    "errorLoadingDefaults": "Erreur lors du chargement des commentaires par défaut",
+    "defaultsLoaded": "Commentaires par défaut chargés avec succès",
+    "noDefaultsAvailable": "Aucun commentaire par défaut disponible",
     "musicStyles": "Styles musicaux",
     "stylesCount": "styles",
     "stylesPlaceholder": "Ex: Electronic, Hip-Hop, Rock... (Appuyez sur Entrée ou tapez une virgule pour ajouter)",
@@ -192,5 +200,28 @@
     "solutions": "Solutions",
     "sectors": "Secteurs",
     "music": "Musique"
+  },
+  "footer": {
+    "description": "L'agence IA Française n°1 pour accompagner votre entreprise vers la transition numérique et l'intelligence artificielle. Nous transformons vos processus métier avec des solutions IA innovantes et sur mesure.",
+    "services": {
+      "title": "Services",
+      "phoneAgents": "Agents téléphoniques",
+      "ecommerce": "E-commerce",
+      "websites": "Édition de sites",
+      "seo": "Référencement",
+      "customProjects": "Projets sur mesure"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "Email",
+      "address": "Adresse",
+      "location": "Paris & Tokyo"
+    },
+    "legal": {
+      "copyright": "Tous droits réservés.",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "legalNotice": "Mentions légales"
+    }
   }
 }

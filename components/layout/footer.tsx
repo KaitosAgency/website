@@ -1,8 +1,12 @@
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaLinkedin, FaYoutube } from 'react-icons/fa';
+import { useI18n } from '@/lib/i18n';
 
 export function Footer() {
+  const { t } = useI18n();
+
   return (
     <footer className="bg-secondarydark text-white">
       <div className="w-full px-4 sm:px-6 lg:px-12 py-12">
@@ -19,44 +23,37 @@ export function Footer() {
               />
             </div>
             <p className="text-offwhite/80 mb-4 max-w-md text-sm mx-auto md:mx-0">
-              L'agence IA Française n°1 pour accompagner votre entreprise vers la transition numérique et l'intelligence artificielle. 
-              Nous transformons vos processus métier avec des solutions IA innovantes et sur mesure.
+              {t("footer.description")}
             </p>
-            <div className="flex space-x-4 justify-center md:justify-start">
-              <Link href="#" className="transition-colors">
-                <span className="sr-only">YouTube</span>
-                <FaYoutube className="h-6 w-6" />
-              </Link>
-            </div>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="text-md font-semibold mb-2">Services</h3>
+            <h3 className="text-md font-semibold mb-2">{t("footer.services.title")}</h3>
             <ul className="space-y-1 text-offwhite/80">
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
-                  Agents téléphoniques
+                  {t("footer.services.phoneAgents")}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
-                  E-commerce
+                  {t("footer.services.ecommerce")}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
-                  Édition de sites
+                  {t("footer.services.websites")}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
-                  Référencement
+                  {t("footer.services.seo")}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-offwhite transition-colors text-sm">
-                  Projets sur mesure
+                  {t("footer.services.customProjects")}
                 </Link>
               </li>
             </ul>
@@ -64,17 +61,17 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-md font-semibold mb-2 text-offwhite">Contact</h3>
+            <h3 className="text-md font-semibold mb-2 text-offwhite">{t("footer.contact.title")}</h3>
             <ul className="space-y-1 text-offwhite/80">
               <li>
-                <span className="block text-sm font-medium">Email</span>
+                <span className="block text-sm font-medium">{t("footer.contact.email")}</span>
                 <Link href="mailto:contact@kaitos.fr" className="transition-colors">
                   contact@kaitos.fr
                 </Link>
               </li>
               <li>
-                <span className="block text-sm font-medium">Adresse</span>
-                <span>Paris & Tokyo</span>
+                <span className="block text-sm font-medium">{t("footer.contact.address")}</span>
+                <span>{t("footer.contact.location")}</span>
               </li>
             </ul>
           </div>
@@ -84,17 +81,17 @@ export function Footer() {
         <div className="border-t border-offwhite/10 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center text-offwhite/80">
             <p className="text-offwhite/80 text-sm">
-              <b>© {new Date().getFullYear()} Kaitos.</b> Tous droits réservés.
+              <b>© {new Date().getFullYear()} Kaitos.</b> {t("footer.legal.copyright")}
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/politique-confidentialite" className="text-sm transition-colors">
-                Politique de confidentialité
+                {t("footer.legal.privacy")}
               </Link>
               <Link href="/conditions-utilisation" className="text-sm transition-colors">
-                Conditions d'utilisation
+                {t("footer.legal.terms")}
               </Link>
               <Link href="/mentions-legales" className="text-sm transition-colors">
-                Mentions légales
+                {t("footer.legal.legalNotice")}
               </Link>
             </div>
           </div>
@@ -102,4 +99,4 @@ export function Footer() {
       </div>
     </footer>
   );
-} 
+}

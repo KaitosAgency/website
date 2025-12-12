@@ -8,11 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { X } from "lucide-react";
+import { X, RotateCcw } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { useSoundCloud } from "@/lib/contexts/soundcloud-context";
 import { useDashboardAuth } from "@/lib/hooks/use-dashboard-auth";
 import { useI18n } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SoundCloudConfig {
   id: string;
@@ -60,6 +71,8 @@ export default function SoundCloudConfigPage() {
   const [comments, setComments] = useState<string[]>([]);
   const [newComment, setNewComment] = useState('');
   const [savingComments, setSavingComments] = useState(false);
+  const [hasChangesComments, setHasChangesComments] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   // Synchroniser les données du contexte avec les états locaux
   useEffect(() => {
@@ -233,7 +246,7 @@ export default function SoundCloudConfigPage() {
     }
   };
 
-  const handleAddComment = async () => {
+  const handleAddComment = () => {
     if (!isSoundCloudConnected) {
       toast.error(t('soundcloudPage.mustBeConnectedComments'));
       return;
@@ -243,23 +256,75 @@ export default function SoundCloudConfigPage() {
       return;
     }
 
+    const commentToCheck = newComment.trim();
+
+    // Validation: Max 20 caractères
+    if (commentToCheck.length > 20) {
+      toast.error(t('soundcloudPage.commentTooLong'));
+      return;
+    }
+
+    // Validation: Pas de liens
+    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(\.[a-z]{2,}\/)/i;
+    if (urlRegex.test(commentToCheck)) {
+      toast.error(t('soundcloudPage.noLinksAllowed'));
+      return;
+    }
+
     if (comments.includes(newComment.trim())) {
       toast.error(t('soundcloudPage.commentExists'));
       return;
     }
 
     const updatedComments = [...comments, newComment.trim()];
-    await saveComments(updatedComments);
+    setComments(updatedComments);
+    setHasChangesComments(true);
     setNewComment('');
   };
 
-  const handleRemoveComment = async (comment: string) => {
+  const handleRemoveComment = (comment: string) => {
     if (!isSoundCloudConnected) {
       toast.error(t('soundcloudPage.mustBeConnectedComments'));
       return;
     }
     const updatedComments = comments.filter(c => c !== comment);
-    await saveComments(updatedComments);
+    setComments(updatedComments);
+    setHasChangesComments(true);
+  };
+
+  const handleSaveComments = () => {
+    saveComments(comments);
+  };
+
+  const handleResetToDefault = async () => {
+    try {
+      const supabase = createClient();
+
+      // Fetch default comments from music_admin_public view
+      const { data, error } = await supabase
+        .from('music_admin_public')
+        .select('default_comments')
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching default comments:', error);
+        toast.error(t('soundcloudPage.errorLoadingDefaults'));
+        return;
+      }
+
+      if (data?.default_comments && Array.isArray(data.default_comments)) {
+        setComments(data.default_comments as string[]);
+        setHasChangesComments(true);
+        setResetDialogOpen(false);
+        toast.success(t('soundcloudPage.defaultsLoaded'));
+      } else {
+        toast.error(t('soundcloudPage.noDefaultsAvailable'));
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error(t('common.error'));
+    }
   };
 
   const saveComments = async (commentsToSave: string[]) => {
@@ -272,6 +337,7 @@ export default function SoundCloudConfigPage() {
       const updatedConfig = await updateConfig({ comments: commentsToSave });
       if (updatedConfig) {
         setComments(updatedConfig.comments || []);
+        setHasChangesComments(false);
         toast.success(t('soundcloudPage.commentsSaved'));
       }
     } catch (err: any) {
@@ -437,7 +503,7 @@ export default function SoundCloudConfigPage() {
                   {t('soundcloudPage.myComments')}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex flex-col gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="comment-input" className="text-sm font-medium text-gray-700">
                     {t('soundcloudPage.addComment')}
@@ -455,13 +521,14 @@ export default function SoundCloudConfigPage() {
                         }
                       }}
                       className="flex-1"
-                      disabled={savingComments || !isSoundCloudConnected || !automation}
+                      disabled={!isSoundCloudConnected || !automation}
                     />
                     <Button
                       onClick={handleAddComment}
-                      disabled={savingComments || !newComment.trim() || !isSoundCloudConnected || !automation}
+                      variant="outline"
+                      disabled={!newComment.trim() || !isSoundCloudConnected || !automation}
                     >
-                      {savingComments ? t('soundcloudPage.adding') : t('soundcloudPage.add')}
+                      {t('soundcloudPage.add')}
                     </Button>
                   </div>
                 </div>
@@ -471,9 +538,6 @@ export default function SoundCloudConfigPage() {
                     <Label className="text-sm font-medium text-gray-700">
                       {t('soundcloudPage.comments')} ({comments.length})
                     </Label>
-                    {savingComments && (
-                      <span className="text-xs text-gray-500">{t('soundcloudPage.saving')}</span>
-                    )}
                   </div>
 
                   {comments.length === 0 ? (
@@ -484,24 +548,56 @@ export default function SoundCloudConfigPage() {
                         <Badge
                           key={index}
                           variant="default"
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
+                          className="group cursor-pointer hover:bg-gray-700 hover:text-white transition-all duration-200"
+                          onClick={() => handleRemoveComment(comment)}
                         >
                           <span>{comment}</span>
-                          <button
-                            onClick={() => handleRemoveComment(comment)}
-                            className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                            aria-label={`${t('soundcloudPage.remove')} ${comment}`}
-                            disabled={savingComments || !isSoundCloudConnected || !automation}
-                          >
+                          <span className="w-0 overflow-hidden opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200 flex items-center justify-end">
                             <X className="h-3 w-3" />
-                          </button>
+                          </span>
                         </Badge>
                       ))}
                     </div>
                   )}
                 </div>
+
+                <div className="flex justify-between items-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setResetDialogOpen(true)}
+                    disabled={!isSoundCloudConnected || !automation}
+                    className="flex items-center gap-2"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    {t('soundcloudPage.resetToDefault')}
+                  </Button>
+
+                  {hasChangesComments && (
+                    <Button onClick={handleSaveComments} disabled={savingComments || !isSoundCloudConnected || !automation}>
+                      {savingComments ? t('soundcloudPage.saving') : t('common.save')}
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
+
+            {/* Alert Dialog for Reset Confirmation */}
+            <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('soundcloudPage.resetConfirmTitle')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('soundcloudPage.resetConfirmMessage')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetToDefault}>
+                    {t('common.confirm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Colonne de droite - Styles musicaux et Limite de suivi */}

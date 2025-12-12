@@ -31,7 +31,7 @@ export async function GET() {
 
     // Récupérer toutes les entrées de logs
     const { data: logs, error: logsError } = await supabase
-      .from('logs_n8n' as any)
+      .from('music_logs' as any)
       .select('*')
       .order('created_at', { ascending: false });
 

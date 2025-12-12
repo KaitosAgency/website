@@ -25,6 +25,8 @@ export default function AdminSoundCloudConfigPage() {
   const [newComment, setNewComment] = useState('');
   const [savingComments, setSavingComments] = useState(false);
 
+  const [hasChanges, setHasChanges] = useState(false);
+
   useEffect(() => {
     checkAdminAndLoad();
   }, []);
@@ -69,13 +71,12 @@ export default function AdminSoundCloudConfigPage() {
     setLoadingComments(true);
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) return;
+      // On n'a plus besoin du user ici car la table est globale, 
+      // mais l'accès est protégé par RLS (seuls les admins peuvent lire)
 
-      // Chercher une entrée admin (peut être n'importe quelle entrée admin)
       const { data, error } = await supabase
-        .from('admin')
+        .from('music_admin')
         .select('default_comments')
         .limit(1)
         .maybeSingle();
@@ -88,99 +89,24 @@ export default function AdminSoundCloudConfigPage() {
       if (data?.default_comments && Array.isArray(data.default_comments) && data.default_comments.length > 0) {
         setDefaultComments(data.default_comments as string[]);
       } else {
-        // Si aucun commentaire, initialiser avec la liste par défaut
+        // Si aucun commentaire, utiliser la liste par défaut
+        // La liste initiale est définie plus bas, on pourrait la sortir du composant pour être plus propre
         const initialComments = [
-          "🌶 pépite",
-          "❤️🔥",
-          "💙🔥",
-          "🔥",
-          "🔊",
-          "🎼",
-          "Cool 💙",
-          "❤️❤️❤️🔥",
-          "Amaaaaazing 🤯",
-          "Incroyable merci !!",
-          "🤯🤯",
-          "yaaay",
-          "🔊🔊🔊🔊",
-          "😍",
-          "❤️🌞",
-          "😍🤤",
-          "Merci ❤️",
-          "Lourdeur",
-          "🔥🔥",
-          "🎧💙",
-          "💪💪💪",
-          "what a vibe :)",
-          "❤️🔥❤️🔥❤️🔥❤️",
-          "❤️",
-          "don't stop plz <3",
-          "waouh 😍🤯",
-          "💣🔥💥",
-          "🔊🔊🔊🔊🔊🔊🔊🔊",
-          "I love this 😍",
-          "c'est ça qu'on veux !",
-          "i love it ❤️",
-          "Wow",
-          "🙏🏻🙏🏻🙏🏻🙏🏻🔥🔥🔥🔥🔥",
-          "Pure energie 🔥",
-          "😍😍😍😍",
-          "sick asf",
-          "❤️‍🔥",
-          "😍🔥",
-          "🤯🤯🤯",
-          "Ahhhhhhh❤️❤️❤️❤️❤️",
-          "YEEHAW",
-          "Mamaaaaaaa",
-          "waaaaaaaaaaa",
-          "j'aiiiiiiiiiime",
-          "❤️‍🔥💥",
-          "bruh",
-          "incrrr",
-          "💓",
-          "!!",
-          "incr",
-          "🤩😍",
-          "❤❤❤",
-          "💜🙏",
-          "🛫🛫🔊😍",
-          "❤️👌👌👌👌😍😍😍",
-          "parfait !",
-          "❤️❤️",
-          "Bon dieux c'est lourd !",
-          "Top ! Bravo l'artiste !",
-          "malade",
-          "❤️🔊🔊🔊",
-          "Respect mec 🏴‍☠️🔊🤩",
-          "coooool :)",
-          "Du kifffff",
-          "dopee",
-          "BOH 🦾🦾🦾🦾",
-          "<3",
-          "!!!!!!!!!!!",
-          "nice",
-          "amazing!!",
-          ":°",
-          "wowww",
-          "nice track",
-          "nice guys",
-          "ouuuuuuh",
-          "Yoooo",
-          "banger",
-          "fat",
-          "🔥🔥🔥",
-          "Insane",
-          "🔥🔥",
-          "Nice!",
-          "!!!",
-          "boomb",
-          "YESSSSSSSSSSSSSSS",
-          "woow 😍😱😤"
+          "🌶 pépite", "❤️🔥", "💙🔥", "🔥", "🔊", "🎼", "Cool 💙", "❤️❤️❤️🔥", "Amaaaaazing 🤯", "Incroyable merci !!",
+          "🤯🤯", "yaaay", "🔊🔊🔊🔊", "😍", "❤️🌞", "😍🤤", "Merci ❤️", "Lourdeur", "🔥🔥", "🎧💙", "💪💪💪",
+          "what a vibe :)", "❤️🔥❤️🔥❤️🔥❤️", "❤️", "don't stop plz <3", "waouh 😍🤯", "💣🔥💥", "🔊🔊🔊🔊🔊🔊🔊🔊",
+          "I love this 😍", "c'est ça qu'on veux !", "i love it ❤️", "Wow", "🙏🏻🙏🏻🙏🏻🙏🏻🔥🔥🔥🔥🔥", "Pure energie 🔥",
+          "😍😍😍😍", "sick asf", "❤️‍🔥", "😍🔥", "🤯🤯🤯", "Ahhhhhhh❤️❤️❤️❤️❤️", "YEEHAW", "Mamaaaaaaa",
+          "waaaaaaaaaaa", "j'aiiiiiiiiiime", "❤️‍🔥💥", "bruh", "incrrr", "💓", "!!", "incr", "🤩😍", "❤❤❤",
+          "💜🙏", "🛫🛫🔊😍", "❤️👌👌👌👌😍😍😍", "parfait !", "❤️❤️", "Bon dieux c'est lourd !", "Top ! Bravo l'artiste !",
+          "malade", "❤️🔊🔊🔊", "Respect mec 🏴‍☠️🔊🤩", "coooool :)", "Du kifffff", "dopee", "BOH 🦾🦾🦾🦾", "<3",
+          "!!!!!!!!!!!", "nice", "amazing!!", ":°", "wowww", "nice track", "nice guys", "ouuuuuuh", "Yoooo",
+          "banger", "fat", "🔥🔥🔥", "Insane", "🔥🔥", "Nice!", "!!!", "boomb", "YESSSSSSSSSSSSSSS", "woow 😍😱😤"
         ];
         setDefaultComments(initialComments);
-        // Sauvegarder les commentaires initiaux seulement si une entrée admin existe
-        // Sinon, on attendra que l'utilisateur ajoute un commentaire pour créer l'entrée
-        if (data) {
+
+        // Si aucune donnée n'existe, on essaie de créer l'entrée singleton
+        if (!data) {
           await saveDefaultComments(initialComments);
         }
       }
@@ -195,52 +121,33 @@ export default function AdminSoundCloudConfigPage() {
     setSavingComments(true);
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) return;
-
-      // Vérifier si une entrée admin existe pour cet utilisateur
+      // Vérifier si l'entrée singleton existe
       const { data: adminEntry } = await supabase
-        .from('admin')
+        .from('music_admin')
         .select('id')
-        .eq('user_id', user.id)
+        .limit(1)
         .maybeSingle();
 
       if (adminEntry) {
         // Mettre à jour l'entrée existante
         const { error } = await supabase
-          .from('admin')
+          .from('music_admin')
           .update({ default_comments: comments })
           .eq('id', adminEntry.id);
 
         if (error) throw error;
       } else {
-        // Vérifier s'il existe une entrée admin (peu importe l'utilisateur)
-        const { data: anyAdminEntry } = await supabase
-          .from('admin')
-          .select('id')
-          .limit(1)
-          .maybeSingle();
+        // Créer la nouvelle entrée singleton (sans user_id)
+        const { error } = await supabase
+          .from('music_admin')
+          .insert({ default_comments: comments });
 
-        if (anyAdminEntry) {
-          // Mettre à jour la première entrée admin trouvée
-          const { error } = await supabase
-            .from('admin')
-            .update({ default_comments: comments })
-            .eq('id', anyAdminEntry.id);
-
-          if (error) throw error;
-        } else {
-          // Créer une nouvelle entrée pour cet utilisateur
-          const { error } = await supabase
-            .from('admin')
-            .insert({ user_id: user.id, default_comments: comments });
-
-          if (error) throw error;
-        }
+        if (error) throw error;
       }
 
       setDefaultComments(comments);
+      setHasChanges(false);
       toast.success('Commentaires sauvegardés avec succès');
     } catch (err: any) {
       console.error('Erreur lors de la sauvegarde:', err);
@@ -250,7 +157,7 @@ export default function AdminSoundCloudConfigPage() {
     }
   };
 
-  const handleAddComment = async () => {
+  const handleAddComment = () => {
     if (!newComment.trim()) {
       toast.error('Veuillez entrer un commentaire');
       return;
@@ -262,13 +169,19 @@ export default function AdminSoundCloudConfigPage() {
     }
 
     const updatedComments = [...defaultComments, newComment.trim()];
-    await saveDefaultComments(updatedComments);
+    setDefaultComments(updatedComments);
+    setHasChanges(true);
     setNewComment('');
   };
 
-  const handleRemoveComment = async (comment: string) => {
+  const handleRemoveComment = (comment: string) => {
     const updatedComments = defaultComments.filter(c => c !== comment);
-    await saveDefaultComments(updatedComments);
+    setDefaultComments(updatedComments);
+    setHasChanges(true);
+  };
+
+  const handleSave = () => {
+    saveDefaultComments(defaultComments);
   };
 
   if (loading) {
@@ -295,7 +208,7 @@ export default function AdminSoundCloudConfigPage() {
               Commentaires par défaut
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-4">
             <div className="space-y-2">
               <Label htmlFor="new-comment" className="text-sm font-medium text-gray-700">
                 Ajouter un commentaire
@@ -316,9 +229,10 @@ export default function AdminSoundCloudConfigPage() {
                 />
                 <Button
                   onClick={handleAddComment}
-                  disabled={savingComments || !newComment.trim()}
+                  variant="outline"
+                  disabled={!newComment.trim()}
                 >
-                  {savingComments ? 'Ajout...' : 'Ajouter'}
+                  Ajouter
                 </Button>
               </div>
             </div>
@@ -332,9 +246,6 @@ export default function AdminSoundCloudConfigPage() {
                     <Label className="text-sm font-medium text-gray-700">
                       Commentaires ({defaultComments.length})
                     </Label>
-                    {savingComments && (
-                      <span className="text-xs text-gray-500">Sauvegarde...</span>
-                    )}
                   </div>
 
                   {defaultComments.length === 0 ? (
@@ -345,23 +256,27 @@ export default function AdminSoundCloudConfigPage() {
                         <Badge
                           key={index}
                           variant="default"
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
+                          className="group cursor-pointer hover:bg-gray-700 hover:text-white transition-all duration-200"
+                          onClick={() => handleRemoveComment(comment)}
                         >
                           <span>{comment}</span>
-                          <button
-                            onClick={() => handleRemoveComment(comment)}
-                            className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                            aria-label={`Supprimer ${comment}`}
-                            disabled={savingComments}
-                          >
+                          <span className="w-0 overflow-hidden opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200 flex items-center justify-end">
                             <X className="h-3 w-3" />
-                          </button>
+                          </span>
                         </Badge>
                       ))}
                     </div>
                   )}
                 </div>
               </>
+            )}
+
+            {hasChanges && (
+              <div className="flex justify-end">
+                <Button onClick={handleSave} disabled={savingComments}>
+                  {savingComments ? 'Sauvegarde...' : 'Enregistrer'}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

@@ -1,7 +1,7 @@
 {
   "common": {
     "siteUnderConstruction": "サイト構築中",
-    "reserveCall": "通話を予約",
+    "reserveCall": "お問い合わせ",
     "loading": "読み込み中...",
     "error": "エラー",
     "success": "成功",
@@ -98,9 +98,17 @@
     "saving": "保存中...",
     "noComments": "コメントが定義されていません。",
     "enterCommentError": "コメントを入力してください",
+    "commentTooLong": "コメントは20文字以内で入力してください",
+    "noLinksAllowed": "リンクは許可されていません",
     "commentExists": "このコメントは既に存在します",
     "commentsSaved": "コメントが正常に保存されました",
     "mustBeConnectedComments": "コメントを保存するにはSoundCloudに接続する必要があります",
+    "resetToDefault": "デフォルト",
+    "resetConfirmTitle": "デフォルトのコメントにリセットしますか?",
+    "resetConfirmMessage": "このアクションにより、現在のコメントがすべて管理者が設定したデフォルトのコメントに置き換えられます。その後、変更を保存する必要があります。",
+    "errorLoadingDefaults": "デフォルトのコメントの読み込みエラー",
+    "defaultsLoaded": "デフォルトのコメントが正常に読み込まれました",
+    "noDefaultsAvailable": "デフォルトのコメントが利用できません",
     "musicStyles": "音楽スタイル",
     "stylesCount": "スタイル",
     "stylesPlaceholder": "例: Electronic, Hip-Hop, Rock... (Enterキーまたはカンマで追加)",
@@ -192,5 +200,28 @@
     "solutions": "ソリューション",
     "sectors": "セクター",
     "music": "音楽"
+  },
+  "footer": {
+    "description": "デジタル変革と人工知能に向けて企業をサポートするフランスNo.1のAIエージェンシー。革新的でカスタマイズされたAIソリューションでビジネスプロセスを変革します。",
+    "services": {
+      "title": "サービス",
+      "phoneAgents": "電話エージェント",
+      "ecommerce": "Eコマース",
+      "websites": "ウェブサイト制作",
+      "seo": "SEO対策",
+      "customProjects": "カスタムプロジェクト"
+    },
+    "contact": {
+      "title": "お問い合わせ",
+      "email": "メール",
+      "address": "住所",
+      "location": "パリ & 東京"
+    },
+    "legal": {
+      "copyright": "全著作権所有。",
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "legalNotice": "法的通知"
+    }
   }
 }

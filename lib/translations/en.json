@@ -1,7 +1,7 @@
 {
   "common": {
     "siteUnderConstruction": "Site under construction",
-    "reserveCall": "Book a call",
+    "reserveCall": "Contact",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -98,9 +98,17 @@
     "saving": "Saving...",
     "noComments": "No comments defined.",
     "enterCommentError": "Please enter a comment",
+    "commentTooLong": "Comment must not exceed 20 characters",
+    "noLinksAllowed": "Links are not allowed",
     "commentExists": "This comment already exists",
     "commentsSaved": "Comments saved successfully",
     "mustBeConnectedComments": "You must be connected to SoundCloud to save your comments",
+    "resetToDefault": "Default",
+    "resetConfirmTitle": "Reset to default comments?",
+    "resetConfirmMessage": "This action will replace all your current comments with the default comments set by the administrator. You will then need to save the changes.",
+    "errorLoadingDefaults": "Error loading default comments",
+    "defaultsLoaded": "Default comments loaded successfully",
+    "noDefaultsAvailable": "No default comments available",
     "musicStyles": "Music Styles",
     "stylesCount": "styles",
     "stylesPlaceholder": "Ex: Electronic, Hip-Hop, Rock... (Press Enter or type a comma to add)",
@@ -192,5 +200,28 @@
     "solutions": "Solutions",
     "sectors": "Sectors",
     "music": "Music"
+  },
+  "footer": {
+    "description": "France's #1 AI agency to support your company through digital transformation and artificial intelligence. We transform your business processes with innovative and customized AI solutions.",
+    "services": {
+      "title": "Services",
+      "phoneAgents": "Phone Agents",
+      "ecommerce": "E-commerce",
+      "websites": "Website Development",
+      "seo": "SEO",
+      "customProjects": "Custom Projects"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "Email",
+      "address": "Address",
+      "location": "Paris & Tokyo"
+    },
+    "legal": {
+      "copyright": "All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "legalNotice": "Legal Notice"
+    }
   }
 }
