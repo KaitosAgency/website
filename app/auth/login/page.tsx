@@ -96,10 +96,24 @@ export default function LoginPage() {
       const supabase = createClient()
       // Récupérer le paramètre redirect s'il existe
       const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/'
+
+      // Récupérer la configuration du domaine depuis la base de données via la vue publique
+      const { data: configData } = await supabase
+        .from('music_admin_public')
+        .select('music_url')
+        .single()
+
+      // Déterminer la base URL pour la redirection
+      let baseUrl = window.location.origin
+      if (configData?.music_url) {
+        const domain = configData.music_url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+        baseUrl = `https://${domain}`
+      }
+
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
+          redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
         },
       })
 
