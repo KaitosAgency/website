@@ -56,11 +56,31 @@ export default function LoginPage() {
         }
 
         setMessage('Connexion réussie ! Redirection...')
-        
+
         // Vérifier s'il y a un paramètre de redirection
         const redirectUrl = new URLSearchParams(window.location.search).get('redirect')
-        router.push(redirectUrl || '/')
-        router.refresh()
+
+        // Récupérer la configuration du domaine depuis la base de données via la vue publique
+        const { data: configData } = await supabase
+          .from('music_admin_public')
+          .select('music_url')
+          .single()
+
+        // Déterminer la base URL pour la redirection
+        let baseUrl = window.location.origin
+        if (configData?.music_url) {
+          const domain = configData.music_url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+          baseUrl = `https://${domain}`
+        }
+
+        // Si l'URL de redirection est relative, on l'ajoute à la base URL
+        if (redirectUrl && redirectUrl.startsWith('/')) {
+          window.location.href = `${baseUrl}${redirectUrl}`
+        } else {
+          window.location.href = redirectUrl || `${baseUrl}/`
+        }
+        // router.push(redirectUrl || '/') // On utilise window.location.href pour forcer la navigation avec le bon domaine
+        // router.refresh()
       }
     } catch (err) {
       setError('Une erreur est survenue lors de la connexion')
@@ -113,7 +133,7 @@ export default function LoginPage() {
               {message}
             </div>
           )}
-          
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

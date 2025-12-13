@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  
+  const supabase = await createClient();
+
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
@@ -30,10 +31,10 @@ export async function GET(request: Request) {
     // Vérifier le state pour la sécurité CSRF
     const cookieStore = await cookies();
     const storedState = cookieStore.get('soundcloud_oauth_state')?.value;
-    
+
     console.log('Stored state:', storedState);
     console.log('Received state:', state);
-    
+
     if (!state || state !== storedState) {
       console.error('State mismatch - stored:', storedState, 'received:', state);
       // En développement, on peut être plus permissif
@@ -47,14 +48,28 @@ export async function GET(request: Request) {
     // Supprimer le cookie state
     cookieStore.delete('soundcloud_oauth_state');
 
-    // Le redirect URI doit correspondre exactement à celui configuré dans SoundCloud
-    const redirectUri = process.env.SOUNDCLOUD_REDIRECT_URI || 'http://localhost:3000/api/auth/soundcloud/callback';
+    // Récupérer l'URL de redirection depuis la base de données
+    const { data: adminConfig } = await supabase
+      .from('music_admin')
+      .select('music_url')
+      .single();
+
+    // Construction de l'URL de redirection
+    // Si music_url est défini (ex: kaitos.com), on l'utilise pour construire l'URL complète
+    // Sinon on fallback sur la variable d'env ou localhost
+    let redirectUri = process.env.SOUNDCLOUD_REDIRECT_URI || 'http://localhost:3000/api/auth/soundcloud/callback';
+
+    if ((adminConfig as any)?.music_url) {
+      const domain = (adminConfig as any).music_url;
+      // On s'assure que le domaine ne contient pas de protocole
+      const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      redirectUri = `https://${cleanDomain}/api/auth/soundcloud/callback`;
+    }
 
     // Appeler l'Edge Function pour échanger le code contre un token
     console.log('Exchanging code for token via Edge Function...');
     console.log('Redirect URI:', redirectUri);
-    
-    const supabase = await createClient();
+
     const { data: tokenData, error: tokenError } = await supabase.functions.invoke('soundcloud-auth', {
       body: {
         action: 'exchange_token',
@@ -85,9 +100,9 @@ export async function GET(request: Request) {
         'Authorization': `OAuth ${accessToken}`,
       },
     });
-    
+
     console.log('User response status:', userResponse.status);
-    
+
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
       console.error('User fetch error:', errorText);
@@ -99,7 +114,7 @@ export async function GET(request: Request) {
 
     // Récupérer l'utilisateur Supabase actuel
     const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-    
+
     if (supabaseUser) {
       // Vérifier si une entrée existe déjà dans soundcloud_users
       const { data: existingSoundcloudUser } = await supabase
@@ -137,7 +152,7 @@ export async function GET(request: Request) {
 
     // Stocker le token et les données utilisateur dans des cookies sécurisés
     const response = NextResponse.redirect(`${baseUrl}/music/dashboard?soundcloud_connected=true`);
-    
+
     // Stocker le token dans un cookie httpOnly
     response.cookies.set('soundcloud_access_token', accessToken, {
       httpOnly: true,

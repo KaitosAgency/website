@@ -87,10 +87,24 @@ export default function SignupPage() {
 
     try {
       const supabase = createClient()
+
+      // Récupérer la configuration du domaine depuis la base de données via la vue publique
+      const { data: configData } = await supabase
+        .from('music_admin_public')
+        .select('music_url')
+        .single()
+
+      // Déterminer la base URL pour la redirection
+      let baseUrl = window.location.origin
+      if (configData?.music_url) {
+        const domain = configData.music_url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+        baseUrl = `https://${domain}`
+      }
+
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${baseUrl}/auth/callback`,
         },
       })
 
@@ -124,7 +138,7 @@ export default function SignupPage() {
               {message}
             </div>
           )}
-          
+
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullname">Nom complet</Label>

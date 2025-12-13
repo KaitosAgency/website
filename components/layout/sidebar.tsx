@@ -15,7 +15,9 @@ import {
   HelpCircle,
   Music,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Disc3,
+  Folder
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -54,6 +56,7 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
   { translationKey: 'sidebar.dashboard', href: '/music/dashboard', icon: LayoutDashboard },
+  { translationKey: 'sidebar.myTracks', href: '#', icon: Disc3, disabled: true },
   { translationKey: 'sidebar.soundcloud', href: '/music/dashboard/soundcloud', icon: Music },
   { translationKey: 'sidebar.spotify', href: '#', icon: SpotifyIcon, disabled: true, comingSoon: true },
   { translationKey: 'sidebar.bandcamp', href: '#', icon: BandcampIcon, disabled: true, comingSoon: true },
@@ -63,6 +66,7 @@ const sidebarItems: SidebarItem[] = [
 
 const adminItems: SidebarItem[] = [
   { translationKey: 'sidebar.adminSoundcloud', href: '/music/dashboard/admin/soundcloud-config', icon: Shield },
+  { translationKey: 'sidebar.project', href: '/music/dashboard/admin/project', icon: Folder },
   { translationKey: 'sidebar.logs', href: '/music/dashboard/admin/logs', icon: AlertCircle },
 ]
 

@@ -24,6 +24,7 @@
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
+    "myTracks": "Mes tracks",
     "soundcloud": "SoundCloud",
     "spotify": "Spotify",
     "bandcamp": "Bandcamp",
@@ -32,6 +33,7 @@
     "comingSoon": "Bientôt",
     "administration": "Administration",
     "adminSoundcloud": "Admin SoundCloud",
+    "project": "Projet",
     "logs": "Logs",
     "support": "Support",
     "settings": "Paramètres",

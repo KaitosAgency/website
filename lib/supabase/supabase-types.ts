@@ -18,14 +18,47 @@ export type Database = {
         Row: {
           default_comments: Json | null
           id: string
+          music_url: string | null
         }
         Insert: {
           default_comments?: Json | null
           id?: string
+          music_url?: string | null
         }
         Update: {
           default_comments?: Json | null
           id?: string
+          music_url?: string | null
+        }
+        Relationships: []
+      }
+      music_logs: {
+        Row: {
+          created_at: string
+          fullname: string | null
+          id: number
+          soundcloud_error: string | null
+          soundcloud_logs: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          fullname?: string | null
+          id?: number
+          soundcloud_error?: string | null
+          soundcloud_logs?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          fullname?: string | null
+          id?: number
+          soundcloud_error?: string | null
+          soundcloud_logs?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -38,6 +71,7 @@ export type Database = {
           created_at: string | null
           engage_with_artists: boolean
           follow_unfollow: boolean
+          fullname: string | null
           id: string
           max_followings: number | null
           refresh_token: string | null
@@ -53,6 +87,7 @@ export type Database = {
           created_at?: string | null
           engage_with_artists?: boolean
           follow_unfollow?: boolean
+          fullname?: string | null
           id?: string
           max_followings?: number | null
           refresh_token?: string | null
@@ -68,6 +103,7 @@ export type Database = {
           created_at?: string | null
           engage_with_artists?: boolean
           follow_unfollow?: boolean
+          fullname?: string | null
           id?: string
           max_followings?: number | null
           refresh_token?: string | null
@@ -123,6 +159,7 @@ export type Database = {
       music_admin_public: {
         Row: {
           default_comments: Json | null
+          music_url: string | null
         }
         Relationships: []
       }
